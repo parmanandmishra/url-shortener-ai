@@ -197,4 +197,11 @@ Generative AI significantly improves engineering productivity when combined with
 - Human engineering judgement
 - Continuous validation
 
-The assessment demonstrates that AI should be treated as a collaborative engineering assistant rather than an autonomous software developer.
+# AI Mistakes & Corrections
+
+| AI Suggestion                                        | Issue Found        | Engineering Decision                                              |
+| ---------------------------------------------------- | ------------------ | ----------------------------------------------------------------- |
+| Generated random short code without uniqueness check | Risk of collisions | Added database unique constraint and retry mechanism              |
+| Missed URL validation                                | Security risk      | Added validation using `@URL` and custom validator                |
+| Generated generic exception handling                 | Poor API design    | Implemented `@ControllerAdvice` with meaningful HTTP status codes |
+
