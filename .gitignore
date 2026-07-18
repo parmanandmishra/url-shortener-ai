@@ -1,0 +1,37 @@
+# IntelliJ IDEA
+.idea/
+*.iml
+
+# Maven
+target/
+
+# Logs
+*.log
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Environment files
+.env
+.env.*
+
+# Java
+*.class
+
+# Maven Wrapper (keep these)
+!.mvn/wrapper/maven-wrapper.jar
+!.mvn/wrapper/maven-wrapper.properties
+
+# VS Code (if you also use it)
+.vscode/
+
+# Node (if frontend is added later)
+node_modules/
+
+# Build folders
+dist/
+build/
+
+# Temporary files
+*.tmp
