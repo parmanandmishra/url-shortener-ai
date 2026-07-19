@@ -1,5 +1,6 @@
 package com.pm.urlshortener.controller;
 
+import com.pm.urlshortener.dto.UrlAnalyticsDto;
 import com.pm.urlshortener.dto.UrlRequestDto;
 import com.pm.urlshortener.dto.UrlResponseDto;
 import com.pm.urlshortener.service.UrlService;
@@ -63,6 +64,20 @@ public class UrlController {
     public ResponseEntity<String> redirectToOriginalUrl(@PathVariable String shortCode) {
         String originalUrl = urlService.getOriginalUrl(shortCode);
         return ResponseEntity.ok(originalUrl);
+    }
+
+    @GetMapping("/analytics/{shortCode}")
+    @Operation(summary = "Get URL analytics", description = "Retrieve click count and metadata for a short URL without incrementing the counter")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Analytics retrieved successfully",
+                    content = @Content(mediaType = "application/json", schema = @Schema(implementation = UrlAnalyticsDto.class))),
+            @ApiResponse(responseCode = "404", description = "Short URL not found"),
+            @ApiResponse(responseCode = "410", description = "Short URL has expired"),
+            @ApiResponse(responseCode = "500", description = "Internal server error")
+    })
+    public ResponseEntity<UrlAnalyticsDto> getAnalytics(@PathVariable String shortCode) {
+        UrlAnalyticsDto analytics = urlService.getAnalytics(shortCode);
+        return ResponseEntity.ok(analytics);
     }
 
     @PutMapping("/{id}")

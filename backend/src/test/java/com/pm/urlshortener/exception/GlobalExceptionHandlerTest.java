@@ -1,0 +1,116 @@
+package com.pm.urlshortener.exception;
+
+import com.pm.urlshortener.dto.UrlRequestDto;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.core.MethodParameter;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.HttpStatusCode;
+import org.springframework.validation.BeanPropertyBindingResult;
+import org.springframework.validation.BindingResult;
+import org.springframework.validation.FieldError;
+import org.springframework.web.bind.MethodArgumentNotValidException;
+import org.springframework.web.context.request.WebRequest;
+
+import java.lang.reflect.Method;
+
+import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.Mockito.when;
+
+@ExtendWith(MockitoExtension.class)
+class GlobalExceptionHandlerTest {
+
+    private final GlobalExceptionHandler handler = new GlobalExceptionHandler();
+
+    @Mock
+    private WebRequest webRequest;
+
+    @Test
+    void handleUrlNotFoundException_shouldReturn404Response() {
+        when(webRequest.getDescription(false)).thenReturn("uri=/api/urls/abc123");
+
+        ResponseEntityAssert<ErrorResponse> result = ResponseEntityAssert.from(
+                handler.handleUrlNotFoundException(new UrlNotFoundException("Short URL not found: abc123"), webRequest));
+
+        assertEquals(HttpStatus.NOT_FOUND, result.status());
+        assertEquals(404, result.body().getStatus());
+        assertEquals("Short URL not found: abc123", result.body().getMessage());
+        assertEquals("/api/urls/abc123", result.body().getPath());
+        assertNotNull(result.body().getTimestamp());
+    }
+
+    @Test
+    void handleInvalidUrlException_shouldReturn400Response() {
+        when(webRequest.getDescription(false)).thenReturn("uri=/api/urls/shorten");
+
+        ResponseEntityAssert<ErrorResponse> result = ResponseEntityAssert.from(
+                handler.handleInvalidUrlException(new InvalidUrlException("URL must start with http:// or https://"), webRequest));
+
+        assertEquals(HttpStatus.BAD_REQUEST, result.status());
+        assertEquals(400, result.body().getStatus());
+        assertEquals("URL must start with http:// or https://", result.body().getMessage());
+        assertEquals("/api/urls/shorten", result.body().getPath());
+        assertNotNull(result.body().getTimestamp());
+    }
+
+    @Test
+    void handleValidationException_shouldReturnFirstFieldErrorMessage() throws Exception {
+        when(webRequest.getDescription(false)).thenReturn("uri=/api/urls/shorten");
+
+        Method method = DummyHandler.class.getDeclaredMethod("handle", UrlRequestDto.class);
+        MethodParameter methodParameter = new MethodParameter(method, 0);
+        BindingResult bindingResult = new BeanPropertyBindingResult(new UrlRequestDto(), "urlRequestDto");
+        bindingResult.addError(new FieldError("urlRequestDto", "originalUrl", "URL cannot be blank"));
+        MethodArgumentNotValidException exception = new MethodArgumentNotValidException(methodParameter, bindingResult);
+
+        ResponseEntityAssert<ErrorResponse> result = ResponseEntityAssert.from(
+                handler.handleValidationException(exception, webRequest));
+
+        assertEquals(HttpStatus.BAD_REQUEST, result.status());
+        assertEquals(400, result.body().getStatus());
+        assertEquals("URL cannot be blank", result.body().getMessage());
+        assertEquals("/api/urls/shorten", result.body().getPath());
+    }
+
+    @Test
+    void handleValidationException_shouldFallbackWhenNoFieldErrorExists() throws Exception {
+        when(webRequest.getDescription(false)).thenReturn("uri=/api/urls/shorten");
+
+        Method method = DummyHandler.class.getDeclaredMethod("handle", UrlRequestDto.class);
+        MethodParameter methodParameter = new MethodParameter(method, 0);
+        BindingResult bindingResult = new BeanPropertyBindingResult(new UrlRequestDto(), "urlRequestDto");
+        MethodArgumentNotValidException exception = new MethodArgumentNotValidException(methodParameter, bindingResult);
+
+        ResponseEntityAssert<ErrorResponse> result = ResponseEntityAssert.from(
+                handler.handleValidationException(exception, webRequest));
+
+        assertEquals("Validation failed", result.body().getMessage());
+    }
+
+    @Test
+    void handleGlobalException_shouldReturn500Response() {
+        when(webRequest.getDescription(false)).thenReturn("uri=/api/urls/shorten");
+
+        ResponseEntityAssert<ErrorResponse> result = ResponseEntityAssert.from(
+                handler.handleGlobalException(new IllegalStateException("boom"), webRequest));
+
+        assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, result.status());
+        assertEquals(500, result.body().getStatus());
+        assertTrue(result.body().getMessage().contains("boom"));
+        assertEquals("/api/urls/shorten", result.body().getPath());
+    }
+
+    private static class DummyHandler {
+        @SuppressWarnings("unused")
+        void handle(UrlRequestDto request) {
+        }
+    }
+
+    private record ResponseEntityAssert<T>(HttpStatusCode status, T body) {
+        static <T> ResponseEntityAssert<T> from(org.springframework.http.ResponseEntity<T> response) {
+            return new ResponseEntityAssert<>(response.getStatusCode(), response.getBody());
+        }
+    }
+}

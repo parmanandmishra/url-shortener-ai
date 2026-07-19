@@ -35,6 +35,86 @@ This document provides a comprehensive explanation of the URL Shortener applicat
 | **Data Validation** | Hibernate Validator | 8.0+ |
 | **ORM** | Hibernate/JPA | 6.0+ |
 
+---
+
+## HLD (High-Level Design)
+
+The high-level design describes the URL shortener as a layered REST application backed by PostgreSQL.
+
+### HLD Summary
+
+- Clients call REST endpoints to create, retrieve, redirect, update, and delete URLs.
+- Controllers handle HTTP concerns and delegate business logic.
+- Services apply validation, short code generation, and expiry rules.
+- Repositories persist and query URL mappings.
+- PostgreSQL stores the canonical URL records and click counts.
+
+### HLD Goals
+
+- Keep the API stateless and scalable.
+- Separate transport, business, and persistence responsibilities.
+- Support secure validation and clear error handling.
+
+---
+
+## LLD (Low-Level Design)
+
+The low-level design maps the architecture to concrete classes and responsibilities.
+
+| Component | Responsibility |
+|---|---|
+| `UrlController` | Expose REST endpoints and map HTTP status codes |
+| `UrlService` | Enforce validation, generate short codes, apply expiry logic |
+| `UrlRepository` | Perform persistence and lookup operations |
+| `UrlMapping` | Represent the database entity |
+| DTOs | Carry request and response payloads |
+| Exception Handler | Convert failures into consistent API errors |
+
+### LLD Notes
+
+- URL validation checks length, protocol, and URL format.
+- Short codes are 6-character alphanumeric values with uniqueness checks.
+- Click count updates are handled transactionally.
+
+---
+
+## Sequence Flow
+
+### Create Short URL
+
+1. Client sends `POST /api/urls/shorten`.
+2. Controller validates the request body.
+3. Service validates the URL and generates a unique short code.
+4. Repository saves the record in PostgreSQL.
+5. API returns `201 Created` with the short URL response.
+
+### Redirect Short URL
+
+1. Client sends `GET /api/urls/redirect/{shortCode}`.
+2. Controller forwards the request to the service layer.
+3. Service resolves the original URL and checks expiry.
+4. Service increments click count atomically.
+5. API returns the redirect response.
+
+### Retrieve Analytics
+
+1. Client sends `GET /api/urls/analytics/{shortCode}`.
+2. Controller delegates to the service.
+3. Service returns the stored analytics fields.
+
+---
+
+## Components
+
+| Component | Type | Role |
+|---|---|---|
+| REST Controller | Presentation | HTTP request handling and response formatting |
+| Service Layer | Business | Validation, expiry logic, and short code generation |
+| Repository Layer | Data Access | Database persistence and lookup |
+| Entity Model | Persistence | Database mapping for URL records |
+| DTO Layer | Contract | Request/response payload transfer |
+| Exception Handler | Cross-cutting | Centralized error mapping |
+
 ### Architectural Style
 
 The application follows a **Layered (N-Tier) Architecture** pattern:
@@ -817,4 +897,3 @@ The URL Shortener application uses a **clean, layered architecture** that priori
 - **Performance**: Optimized queries and indexes
 
 The planned URL Expiration feature will enhance the system's capabilities while maintaining architectural integrity.
-

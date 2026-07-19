@@ -1,5 +1,6 @@
 package com.pm.urlshortener.service;
 
+import com.pm.urlshortener.dto.UrlAnalyticsDto;
 import com.pm.urlshortener.dto.UrlRequestDto;
 import com.pm.urlshortener.dto.UrlResponseDto;
 import com.pm.urlshortener.entity.UrlMapping;
@@ -36,19 +37,20 @@ public class UrlService {
     }
 
     public UrlResponseDto createShortUrl(UrlRequestDto request) {
-        validateUrl(request.getOriginalUrl());
+        String originalUrl = normalizeUrl(request.getOriginalUrl());
+        validateUrl(originalUrl);
 
         String shortCode = generateUniqueShortCode();
 
         UrlMapping urlMapping = UrlMapping.builder()
-                .originalUrl(request.getOriginalUrl())
+                .originalUrl(originalUrl)
                 .shortCode(shortCode)
                 .createdDate(LocalDateTime.now())
                 .clickCount(0L)
                 .build();
 
         UrlMapping savedUrl = urlRepository.save(urlMapping);
-        logger.info("Created short URL with code: {} for URL: {}", shortCode, maskUrl(request.getOriginalUrl()));
+        logger.info("Created short URL with code: {} for URL: {}", shortCode, maskUrl(originalUrl));
         return mapToResponseDto(savedUrl);
     }
 
@@ -68,12 +70,25 @@ public class UrlService {
         return urlMapping.getOriginalUrl();
     }
 
+    @Transactional(readOnly = true)
+    public UrlAnalyticsDto getAnalytics(String shortCode) {
+        UrlMapping urlMapping = getAndValidateUrlByShortCode(shortCode);
+        return UrlAnalyticsDto.builder()
+                .originalUrl(urlMapping.getOriginalUrl())
+                .shortCode(urlMapping.getShortCode())
+                .clickCount(urlMapping.getClickCount())
+                .createdDate(urlMapping.getCreatedDate())
+                .expiryDate(urlMapping.getExpiryDate())
+                .build();
+    }
+
     public UrlResponseDto updateUrl(Long id, UrlRequestDto request) {
         UrlMapping urlMapping = urlRepository.findById(id)
                 .orElseThrow(() -> new UrlNotFoundException("URL not found with id: " + id));
 
-        validateUrl(request.getOriginalUrl());
-        urlMapping.setOriginalUrl(request.getOriginalUrl());
+        String normalizedUrl = normalizeUrl(request.getOriginalUrl());
+        validateUrl(normalizedUrl);
+        urlMapping.setOriginalUrl(normalizedUrl);
 
         UrlMapping updatedUrl = urlRepository.save(urlMapping);
         logger.info("Updated URL with id: {}", id);
@@ -132,6 +147,27 @@ public class UrlService {
         return sb.toString();
     }
 
+    /**
+     * Auto-prepends "https://" when the input has no protocol at all.
+     * If a different protocol is present (e.g. ftp://) it is left unchanged
+     * and will be rejected by validateUrl().
+     */
+    private String normalizeUrl(String urlString) {
+        if (urlString == null || urlString.isBlank()) {
+            return urlString;
+        }
+        String lower = urlString.toLowerCase();
+        if (lower.startsWith("http://") || lower.startsWith("https://")) {
+            return urlString;
+        }
+        // Has an explicit (but unsupported) protocol — leave as-is so validateUrl rejects it cleanly
+        if (urlString.contains("://")) {
+            return urlString;
+        }
+        // No protocol at all — default to https://
+        return "https://" + urlString;
+    }
+
     private void validateUrl(String urlString) {
         if (urlString == null || urlString.isBlank()) {
             throw new InvalidUrlException("URL cannot be null or empty");
@@ -141,11 +177,13 @@ public class UrlService {
             throw new InvalidUrlException("URL exceeds maximum length of " + MAX_URL_LENGTH + " characters");
         }
 
+        // Protocol check first — gives a clean, user-facing message before URL parsing
+        if (!urlString.toLowerCase().startsWith("http://") && !urlString.toLowerCase().startsWith("https://")) {
+            throw new InvalidUrlException("URL must start with http:// or https://");
+        }
+
         try {
             new URL(urlString).toURI();
-            if (!urlString.toLowerCase().startsWith("http://") && !urlString.toLowerCase().startsWith("https://")) {
-                throw new InvalidUrlException("URL must start with http:// or https://");
-            }
         } catch (MalformedURLException | IllegalArgumentException | URISyntaxException e) {
             throw new InvalidUrlException("Invalid URL format: " + e.getMessage());
         }

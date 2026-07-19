@@ -44,7 +44,19 @@ Requirement Analysis
 
 Prompt
 
-Analyze the URL Shortener problem and identify functional and non-functional requirements.
+Read the assessment requirements and create a structured requirement analysis.
+
+Separate:
+
+- Functional Requirements
+- Non Functional Requirements
+- Constraints
+- Acceptance Criteria
+- AI Usage Expectations
+
+Output
+Docs/
+01_REQUIREMENT_ANALYSIS.md
 
 Outcome
 
@@ -56,7 +68,7 @@ Accepted after refinement.
 
 ---
 
-## Prompt 2
+## Prompt 2 Generate Task Decomposition
 
 Objective
 
@@ -76,13 +88,23 @@ Modified implementation order.
 
 ---
 
-## Prompt 3
+## Prompt 3 - Design Engineering Approach
 
-Objective
+Create Engineering Approach for this assessment.
 
-Architecture
+Include
 
-Prompt
+- Agile
+- SDLC
+- AI Assisted Development
+- Coding Standards
+- Testing Strategy
+- Deployment
+
+
+## Prompt 4 - Design Scalable Architecture
+
+
 
 Design scalable Spring Boot architecture.
 
@@ -108,7 +130,7 @@ Accepted with minor simplifications.
 
 ---
 
-## Prompt 4
+## Prompt 5 - Generate REST Controller
 
 Intent
 
@@ -141,7 +163,7 @@ Accepted with minor adjustments.
 
 ---
 
-## Prompt 5 - Generate JPA entity for URL Mapping
+## Prompt 6 - Generate JPA entity for URL Mapping
 
 Objective
 
@@ -223,46 +245,112 @@ Transaction Management
 
 SOLID
 
-## Prompt 8 - Generate Unit Tests
 
-Objective
+## Prompt 9 - Code Quality & Architecture Review
 
-Unit Tests
+Review this code as if you are a Principal Java Architect.
+Suggest
+Security
+Performance
+Readability
+Maintainability
+Spring Boot best practices
+Do not rewrite unless necessary.
 
-Prompt
-
-Generate JUnit5 test cases.
-
-Cover
-
-Success
-
-Failure
-
-Invalid URL
-
-Expired URL
-
-Duplicate URL
-
-Repository Exception
-Outcome
-
-Tests generated.
-
-Decision
-
-Added additional edge cases manually.
-
----
 
 ## Prompt 9 - Generate API documentations
 
-Generate API documentation.
+Analyze my Spring Boot project and generate a professional API_DOCUMENTATION.md.
 
-Generate README.
+Document only the implemented REST APIs.
 
-Generate Architecture explanation.
+For each API include:
+- Purpose
+- HTTP Method
+- Endpoint
+- Request
+- Response
+- Status Codes
+- Validation Rules
+- Sample Request & Response
+- Error Responses
+
+Also include:
+- API Overview
+- Authentication
+- Error Handling
+- Versioning
+- Swagger/OpenAPI information
+
+Generate clean markdown suitable for Docs/API_DOCUMENTATION.md.
+
+
+## Prompt 10 - Generate API Test Plan
+
+Generate enterprise API Test Plan.
+
+Include
+
+Positive
+
+Negative
+
+Boundary
+
+Security
+
+Performance
+
+Validation
+
+OWASP
+
+
+## Prompt 8 - Generate Unit Tests
+
+Generate JUnit5 tests.
+
+Use Mockito.
+
+Cover
+
+Positive
+
+Negative
+
+Boundary
+
+Repository Failure
+
+
+---
+
+## Prompt 8 - Additional API Testing
+
+You are a Principal QA Architect.
+
+Objective:
+Validate the URL Shortener application using AI-assisted testing.
+
+Tasks:
+1. Discover all REST APIs.
+2. Execute:
+- Positive Tests
+- Negative Tests
+- Boundary Tests
+- Validation Tests
+
+
+## Prompt 8 - Code Coverage Analysis
+
+Analyze my Spring Boot project and identify classes with low or no test coverage.
+
+Generate only the missing JUnit 5 and Mockito tests to achieve at least 80% line coverage.
+
+Do not modify production code.
+
+
+
 
 
 # AI Productivity
@@ -314,3 +402,55 @@ Generative AI significantly improves engineering productivity when combined with
 | Missed URL validation                                | Security risk      | Added validation using `@URL` and custom validator                |
 | Generated generic exception handling                 | Poor API design    | Implemented `@ControllerAdvice` with meaningful HTTP status codes |
 
+
+## Prompt 12 - Exception Analysis
+You are a Principal Java Architect and Production Support Engineer.
+
+Analyze the following exception as if this occurred in a production Spring Boot application.
+
+Application Details:
+- Java 21
+- Spring Boot 3.5
+- Maven
+- IntelliJ IDEA
+- PostgreSQL
+- REST APIs
+- Running locally on macOS
+
+Exception:
+
+java.io.IOException: The server sockets created using the LocalRMIServerSocketFactory only accept connections from clients running on the host where the RMI remote objects have been exported.
+at jdk.management.agent/sun.management.jmxremote.LocalRMIServerSocketFactory$1.accept(LocalRMIServerSocketFactory.java:114)
+at java.rmi/sun.rmi.transport.tcp.TCPTransport$AcceptLoop.executeAcceptLoop(TCPTransport.java:424)
+at java.rmi/sun.rmi.transport.tcp.TCPTransport$AcceptLoop.run(TCPTransport.java:388)
+at java.base/java.lang.Thread.run(Thread.java:1583)
+
+Please provide:
+
+1. Executive Summary (2-3 lines)
+2. Root Cause Analysis
+3. Why this error occurs
+4. Is it a framework issue, JVM issue, Spring Boot issue, IntelliJ issue, or application code issue?
+5. Is this error blocking application functionality or only a warning?
+6. Common scenarios where this happens.
+7. How to reproduce it.
+8. Step-by-step troubleshooting process.
+9. Recommended fixes (ordered from most likely to least likely).
+10. How to verify the fix.
+11. Best practices to avoid this issue in production.
+12. Whether this issue can be safely ignored during local development.
+13. Confidence level for each possible root cause.
+
+Do not immediately assume a single cause.
+Provide reasoning for each possible cause and explain how to validate it.
+Return the answer in a structured markdown format suitable for documenting in an engineering troubleshooting guide.
+
+## Prmopt 13 - Exception Analysis
+
+Analyze this compilation error.
+“java: java.lang.ExceptionInInitializerError
+com.sun.tools.javac.code.TypeTag :: UNKNOWN”
+
+Suggest root cause.
+Do not rewrite code.
+Only explain issue.

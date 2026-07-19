@@ -1,0 +1,845 @@
+{
+  "info": {
+    "name": "URL Shortener API Collection",
+    "_postman_id": "b3e6d8a4-1f13-4f93-9fa5-7bf5c1a5a7f0",
+    "description": "Postman Collection for Spring Boot URL Shortener application. Covers positive, negative, boundary, and validation tests with HTTP status, response time, and JSON assertions.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:8080"
+    },
+    {
+      "key": "shortCode",
+      "value": ""
+    },
+    {
+      "key": "recordId",
+      "value": ""
+    },
+    {
+      "key": "maxUrl",
+      "value": ""
+    },
+    {
+      "key": "overUrl",
+      "value": ""
+    },
+    {
+      "key": "longShortCode",
+      "value": ""
+    }
+  ],
+  "item": [
+    {
+      "name": "Positive Tests",
+      "item": [
+        {
+          "name": "Create Short URL - Valid HTTPS",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"originalUrl\": \"https://github.com/parmanandmishra/url-shortener-ai\"\n}"
+            },
+            "url": "{{baseUrl}}/api/urls/shorten"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP status is 201', function () { pm.response.to.have.status(201); });",
+                  "pm.test('Response time is below 2000 ms', function () { pm.expect(pm.response.responseTime).to.be.below(2000); });",
+                  "pm.test('Response body is valid JSON', function () { pm.expect(function () { pm.response.json(); }).to.not.throw(); });",
+                  "const json = pm.response.json();",
+                  "pm.test('Response contains shortCode', function () { pm.expect(json).to.have.property('shortCode'); });",
+                  "pm.test('shortCode is 6 characters', function () { pm.expect(json.shortCode).to.have.lengthOf(6); });",
+                  "pm.test('Response contains originalUrl', function () { pm.expect(json.originalUrl).to.eql('https://github.com/parmanandmishra/url-shortener-ai'); });",
+                  "pm.collectionVariables.set('shortCode', json.shortCode);",
+                  "pm.collectionVariables.set('recordId', json.id);"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Create Short URL - Auto Normalize google.com",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"originalUrl\": \"google.com\"\n}"
+            },
+            "url": "{{baseUrl}}/api/urls/shorten"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP status is 201', function () { pm.response.to.have.status(201); });",
+                  "pm.test('Response time is below 2000 ms', function () { pm.expect(pm.response.responseTime).to.be.below(2000); });",
+                  "pm.test('Response body is valid JSON', function () { pm.expect(function () { pm.response.json(); }).to.not.throw(); });",
+                  "const json = pm.response.json();",
+                  "pm.test('Auto-normalized URL uses https', function () { pm.expect(json.originalUrl).to.eql('https://google.com'); });",
+                  "pm.test('Response contains shortCode', function () { pm.expect(json).to.have.property('shortCode'); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Get URL Details - Valid Short Code",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/api/urls/{{shortCode}}"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP status is 200', function () { pm.response.to.have.status(200); });",
+                  "pm.test('Response time is below 2000 ms', function () { pm.expect(pm.response.responseTime).to.be.below(2000); });",
+                  "pm.test('Response body is valid JSON', function () { pm.expect(function () { pm.response.json(); }).to.not.throw(); });",
+                  "const json = pm.response.json();",
+                  "pm.test('Response contains expected keys', function () {",
+                  "  pm.expect(json).to.have.property('id');",
+                  "  pm.expect(json).to.have.property('originalUrl');",
+                  "  pm.expect(json).to.have.property('shortCode');",
+                  "  pm.expect(json).to.have.property('createdDate');",
+                  "  pm.expect(json).to.have.property('clickCount');",
+                  "});",
+                  "pm.test('Response shortCode matches request variable', function () { pm.expect(json.shortCode).to.eql(pm.collectionVariables.get('shortCode')); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Redirect - Valid Short Code",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "*/*"
+              }
+            ],
+            "url": "{{baseUrl}}/api/urls/redirect/{{shortCode}}"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP status is 200', function () { pm.response.to.have.status(200); });",
+                  "pm.test('Response time is below 2000 ms', function () { pm.expect(pm.response.responseTime).to.be.below(2000); });",
+                  "pm.test('Response is plain text', function () { pm.expect(pm.response.headers.get('Content-Type') || '').to.include('text/plain'); });",
+                  "pm.test('Body contains a URL', function () { pm.expect(pm.response.text()).to.match(/^https?:\\/\\//); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Get Analytics - Valid Short Code",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/api/urls/analytics/{{shortCode}}"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP status is 200', function () { pm.response.to.have.status(200); });",
+                  "pm.test('Response time is below 2000 ms', function () { pm.expect(pm.response.responseTime).to.be.below(2000); });",
+                  "pm.test('Response body is valid JSON', function () { pm.expect(function () { pm.response.json(); }).to.not.throw(); });",
+                  "const json = pm.response.json();",
+                  "pm.test('Analytics response has expected keys', function () {",
+                  "  pm.expect(json).to.have.property('originalUrl');",
+                  "  pm.expect(json).to.have.property('shortCode');",
+                  "  pm.expect(json).to.have.property('clickCount');",
+                  "  pm.expect(json).to.have.property('createdDate');",
+                  "  pm.expect(json).to.have.property('expiryDate');",
+                  "});",
+                  "pm.test('Analytics shortCode matches request variable', function () { pm.expect(json.shortCode).to.eql(pm.collectionVariables.get('shortCode')); });",
+                  "pm.test('Analytics clickCount is numeric', function () { pm.expect(json.clickCount).to.be.a('number'); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Update URL - Valid ID",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"originalUrl\": \"https://www.updated-example.com/new-page\"\n}"
+            },
+            "url": "{{baseUrl}}/api/urls/{{recordId}}"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP status is 200', function () { pm.response.to.have.status(200); });",
+                  "pm.test('Response time is below 2000 ms', function () { pm.expect(pm.response.responseTime).to.be.below(2000); });",
+                  "pm.test('Response body is valid JSON', function () { pm.expect(function () { pm.response.json(); }).to.not.throw(); });",
+                  "const json = pm.response.json();",
+                  "pm.test('Updated originalUrl returned', function () { pm.expect(json.originalUrl).to.eql('https://www.updated-example.com/new-page'); });",
+                  "pm.test('Record id is preserved', function () { pm.expect(json.id).to.eql(Number(pm.collectionVariables.get('recordId'))); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Delete URL - Valid ID",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/api/urls/{{recordId}}"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP status is 204', function () { pm.response.to.have.status(204); });",
+                  "pm.test('Response time is below 2000 ms', function () { pm.expect(pm.response.responseTime).to.be.below(2000); });",
+                  "pm.test('Response body is empty', function () { pm.expect(pm.response.text()).to.eql(''); });"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Negative Tests",
+      "item": [
+        {
+          "name": "Create Short URL - Unsupported Protocol",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"originalUrl\": \"ftp://example.com/file\"\n}"
+            },
+            "url": "{{baseUrl}}/api/urls/shorten"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP status is 400', function () { pm.response.to.have.status(400); });",
+                  "pm.test('Response time is below 2000 ms', function () { pm.expect(pm.response.responseTime).to.be.below(2000); });",
+                  "pm.test('Response body is valid JSON', function () { pm.expect(function () { pm.response.json(); }).to.not.throw(); });",
+                  "const json = pm.response.json();",
+                  "pm.test('Error message is returned', function () { pm.expect(json.message).to.eql('URL must start with http:// or https://'); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Get URL Details - Unknown Short Code",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/api/urls/XXXXXX"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP status is 404', function () { pm.response.to.have.status(404); });",
+                  "pm.test('Response body is valid JSON', function () { pm.expect(function () { pm.response.json(); }).to.not.throw(); });",
+                  "const json = pm.response.json();",
+                  "pm.test('Not found message is returned', function () { pm.expect(json.message).to.include('Short URL not found'); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Redirect - Unknown Short Code",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "*/*"
+              }
+            ],
+            "url": "{{baseUrl}}/api/urls/redirect/NOTEXIST"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP status is 404', function () { pm.response.to.have.status(404); });",
+                  "pm.test('Response body is valid JSON', function () { pm.expect(function () { pm.response.json(); }).to.not.throw(); });",
+                  "const json = pm.response.json();",
+                  "pm.test('Not found message is returned', function () { pm.expect(json.message).to.include('Short URL not found'); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Get Analytics - Unknown Short Code",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/api/urls/analytics/NOTEXIST"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP status is 404', function () { pm.response.to.have.status(404); });",
+                  "pm.test('Response body is valid JSON', function () { pm.expect(function () { pm.response.json(); }).to.not.throw(); });",
+                  "const json = pm.response.json();",
+                  "pm.test('Not found message is returned', function () { pm.expect(json.message).to.include('Short URL not found'); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Update URL - Invalid Protocol",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"originalUrl\": \"ftp://bad-protocol.com\"\n}"
+            },
+            "url": "{{baseUrl}}/api/urls/{{recordId}}"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP status is 400', function () { pm.response.to.have.status(400); });",
+                  "pm.test('Response body is valid JSON', function () { pm.expect(function () { pm.response.json(); }).to.not.throw(); });",
+                  "const json = pm.response.json();",
+                  "pm.test('Protocol validation message returned', function () { pm.expect(json.message).to.eql('URL must start with http:// or https://'); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Delete URL - Nonexistent ID",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/api/urls/9999"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP status is 404', function () { pm.response.to.have.status(404); });",
+                  "pm.test('Response body is valid JSON', function () { pm.expect(function () { pm.response.json(); }).to.not.throw(); });",
+                  "const json = pm.response.json();",
+                  "pm.test('Not found message is returned', function () { pm.expect(json.message).to.include('URL not found with id'); });"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Boundary Tests",
+      "item": [
+        {
+          "name": "Create Short URL - Maximum Length (2048)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"originalUrl\": \"{{maxUrl}}\"\n}"
+            },
+            "url": "{{baseUrl}}/api/urls/shorten"
+          },
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const prefix = 'https://example.com/';",
+                  "const remaining = 2048 - prefix.length;",
+                  "pm.collectionVariables.set('maxUrl', prefix + 'a'.repeat(remaining));"
+                ]
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP status is 201', function () { pm.response.to.have.status(201); });",
+                  "pm.test('Response body is valid JSON', function () { pm.expect(function () { pm.response.json(); }).to.not.throw(); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Create Short URL - Over Maximum Length (2049)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"originalUrl\": \"{{overUrl}}\"\n}"
+            },
+            "url": "{{baseUrl}}/api/urls/shorten"
+          },
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const prefix = 'https://example.com/';",
+                  "const remaining = 2049 - prefix.length;",
+                  "pm.collectionVariables.set('overUrl', prefix + 'a'.repeat(remaining));"
+                ]
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP status is 400', function () { pm.response.to.have.status(400); });",
+                  "pm.test('Response body is valid JSON', function () { pm.expect(function () { pm.response.json(); }).to.not.throw(); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Get URL Details - Long Short Code (50 chars)",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/api/urls/{{longShortCode}}"
+          },
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.collectionVariables.set('longShortCode', 'a'.repeat(50));"
+                ]
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP status is 404', function () { pm.response.to.have.status(404); });",
+                  "pm.test('Response body is valid JSON', function () { pm.expect(function () { pm.response.json(); }).to.not.throw(); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Update URL - Maximum Length (2048)",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"originalUrl\": \"{{maxUrl}}\"\n}"
+            },
+            "url": "{{baseUrl}}/api/urls/{{recordId}}"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP status is 200', function () { pm.response.to.have.status(200); });",
+                  "pm.test('Response body is valid JSON', function () { pm.expect(function () { pm.response.json(); }).to.not.throw(); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Delete URL - ID Zero",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/api/urls/0"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP status is 404', function () { pm.response.to.have.status(404); });",
+                  "pm.test('Response body is valid JSON', function () { pm.expect(function () { pm.response.json(); }).to.not.throw(); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Delete URL - Negative ID",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/api/urls/-1"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP status is 404', function () { pm.response.to.have.status(404); });",
+                  "pm.test('Response body is valid JSON', function () { pm.expect(function () { pm.response.json(); }).to.not.throw(); });"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Validation Tests",
+      "item": [
+        {
+          "name": "Create Short URL - Missing Field",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{}"
+            },
+            "url": "{{baseUrl}}/api/urls/shorten"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP status is 400', function () { pm.response.to.have.status(400); });",
+                  "pm.test('Response body is valid JSON', function () { pm.expect(function () { pm.response.json(); }).to.not.throw(); });",
+                  "const json = pm.response.json();",
+                  "pm.test('Validation message returned', function () { pm.expect(json.message).to.eql('URL cannot be blank'); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Create Short URL - Null Field",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"originalUrl\": null\n}"
+            },
+            "url": "{{baseUrl}}/api/urls/shorten"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP status is 400', function () { pm.response.to.have.status(400); });",
+                  "pm.test('Response body is valid JSON', function () { pm.expect(function () { pm.response.json(); }).to.not.throw(); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Create Short URL - Whitespace Field",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"originalUrl\": \"   \"\n}"
+            },
+            "url": "{{baseUrl}}/api/urls/shorten"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP status is 400', function () { pm.response.to.have.status(400); });",
+                  "pm.test('Response body is valid JSON', function () { pm.expect(function () { pm.response.json(); }).to.not.throw(); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Create Short URL - Invalid JSON (Unquoted Key)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{originalUrl:\"https://example.com\"}"
+            },
+            "url": "{{baseUrl}}/api/urls/shorten"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP status is 400', function () { pm.response.to.have.status(400); });",
+                  "pm.test('Response body is valid JSON', function () { pm.expect(function () { pm.response.json(); }).to.not.throw(); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Create Short URL - Invalid JSON (Truncated Payload)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"originalUrl\": \"https://example.com\""
+            },
+            "url": "{{baseUrl}}/api/urls/shorten"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP status is 400', function () { pm.response.to.have.status(400); });",
+                  "pm.test('Response body is valid JSON', function () { pm.expect(function () { pm.response.json(); }).to.not.throw(); });"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

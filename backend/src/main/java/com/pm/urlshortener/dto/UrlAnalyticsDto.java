@@ -1,54 +1,25 @@
-package com.pm.urlshortener.entity;
-
-import jakarta.persistence.*;
+package com.pm.urlshortener.dto;
 
 import java.time.LocalDateTime;
 
-@Entity
-@Table(name = "urls", indexes = {
-    @Index(name = "idx_short_code", columnList = "shortCode", unique = true),
-    @Index(name = "idx_created_date", columnList = "createdDate"),
-    @Index(name = "idx_expiry_date", columnList = "expiryDate")
-})
-public class UrlMapping {
+public class UrlAnalyticsDto {
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
-
-    @Column(nullable = false, columnDefinition = "TEXT")
     private String originalUrl;
-
-    @Column(nullable = false, unique = true)
     private String shortCode;
-
-    @Column(nullable = false)
+    private Long clickCount;
     private LocalDateTime createdDate;
-
-    @Column
     private LocalDateTime expiryDate;
 
-    @Column(nullable = false)
-    private Long clickCount = 0L;
-
-    public UrlMapping() {
+    public UrlAnalyticsDto() {
     }
 
-    public UrlMapping(Long id, String originalUrl, String shortCode, LocalDateTime createdDate, LocalDateTime expiryDate, Long clickCount) {
-        this.id = id;
+    public UrlAnalyticsDto(String originalUrl, String shortCode, Long clickCount,
+                           LocalDateTime createdDate, LocalDateTime expiryDate) {
         this.originalUrl = originalUrl;
         this.shortCode = shortCode;
+        this.clickCount = clickCount;
         this.createdDate = createdDate;
         this.expiryDate = expiryDate;
-        this.clickCount = clickCount;
-    }
-
-    public Long getId() {
-        return id;
-    }
-
-    public void setId(Long id) {
-        this.id = id;
     }
 
     public String getOriginalUrl() {
@@ -67,6 +38,14 @@ public class UrlMapping {
         this.shortCode = shortCode;
     }
 
+    public Long getClickCount() {
+        return clickCount;
+    }
+
+    public void setClickCount(Long clickCount) {
+        this.clickCount = clickCount;
+    }
+
     public LocalDateTime getCreatedDate() {
         return createdDate;
     }
@@ -83,32 +62,18 @@ public class UrlMapping {
         this.expiryDate = expiryDate;
     }
 
-    public Long getClickCount() {
-        return clickCount;
-    }
-
-    public void setClickCount(Long clickCount) {
-        this.clickCount = clickCount;
-    }
-
     public static Builder builder() {
         return new Builder();
     }
 
     public static final class Builder {
-        private Long id;
         private String originalUrl;
         private String shortCode;
+        private Long clickCount;
         private LocalDateTime createdDate;
         private LocalDateTime expiryDate;
-        private Long clickCount = 0L;
 
         private Builder() {
-        }
-
-        public Builder id(Long id) {
-            this.id = id;
-            return this;
         }
 
         public Builder originalUrl(String originalUrl) {
@@ -118,6 +83,11 @@ public class UrlMapping {
 
         public Builder shortCode(String shortCode) {
             this.shortCode = shortCode;
+            return this;
+        }
+
+        public Builder clickCount(Long clickCount) {
+            this.clickCount = clickCount;
             return this;
         }
 
@@ -131,13 +101,8 @@ public class UrlMapping {
             return this;
         }
 
-        public Builder clickCount(Long clickCount) {
-            this.clickCount = clickCount;
-            return this;
-        }
-
-        public UrlMapping build() {
-            return new UrlMapping(id, originalUrl, shortCode, createdDate, expiryDate, clickCount);
+        public UrlAnalyticsDto build() {
+            return new UrlAnalyticsDto(originalUrl, shortCode, clickCount, createdDate, expiryDate);
         }
     }
 }

@@ -23,6 +23,35 @@ The URL Shortener API provides REST endpoints for creating, retrieving, updating
 
 ---
 
+## Requirements Coverage
+
+This API document is aligned to the assessment requirements and covers the full URL shortener lifecycle.
+
+### Functional Coverage
+
+| Requirement | Document Coverage |
+|---|---|
+| Create Short URL | `POST /api/urls/shorten` endpoint and success response |
+| Store URL Mapping | Create endpoint response, persistence model, and database-backed storage |
+| Generate Unique Short Code | Short code field definition and create endpoint behavior |
+| Validate URLs | Request DTO constraints and validation rules |
+| Handle Invalid Request | Error handling section and validation/error examples |
+| Track Click Count | Redirect endpoint notes and click count response field |
+| URL Expiry | `expiryDate` field, validation rules, and expired resource behavior |
+
+### Non-Functional Coverage
+
+| Requirement | Document Coverage |
+|---|---|
+| URL shortening ≤ 500 ms | Rate limiting / performance expectations and assessment documentation |
+| URL redirection ≤ 200 ms | Redirect endpoint behavior and performance expectations |
+| Concurrent requests | Stateless REST design and operational assumptions |
+| Scalability | Layered architecture, indexing, and future enhancements |
+| Security | Validation, sanitization, and error handling |
+| Maintainability | Clear endpoint contracts and model separation |
+
+---
+
 ## Authentication
 
 Currently, the API does not require authentication. Future versions will implement API key or OAuth 2.0 authentication.
@@ -646,4 +675,3 @@ http://localhost:8080/v3/api-docs
 - Custom short codes
 - QR code generation
 - Webhooks for expiration events
-

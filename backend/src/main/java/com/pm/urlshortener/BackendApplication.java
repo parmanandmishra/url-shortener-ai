@@ -1,15 +1,9 @@
 package com.pm.urlshortener;
 
-import com.pm.urlshortener.dto.UrlRequestDto;
-import com.pm.urlshortener.dto.UrlResponseDto;
-import com.pm.urlshortener.service.UrlService;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.boot.context.properties.ConfigurationProperties;
-import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
 
 @SpringBootApplication
 public class BackendApplication {
@@ -19,7 +13,7 @@ public class BackendApplication {
     }
 
     @Bean
-    public CommandLineRunner run(UrlService urlService) {
+    public CommandLineRunner run() {
         return args -> {
             System.out.println("=== URL Shortener Application Started ===");
             System.out.println("API Documentation: http://localhost:8080/swagger-ui.html");

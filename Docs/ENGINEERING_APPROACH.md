@@ -24,6 +24,138 @@ The solution was developed based on the following principles:
 
 ---
 
+# Problem Statement and Context
+
+The assessment problem statement and business goal are defined in `Docs/REQUIREMENT_ANALYSIS.md`. This engineering document does not repeat that content; instead, it builds on it by describing how the solution is approached, validated, and delivered.
+
+In short, the implementation is designed to support URL shortening, persistence, retrieval, redirection, validation, and optional expiry while preserving testability, maintainability, and clear AI oversight.
+
+---
+
+# Goals and Non-Goals
+
+## Goals
+
+- Deliver a stable REST-based URL shortener.
+- Demonstrate AI-assisted development with human review.
+- Keep the codebase maintainable and testable.
+- Support secure validation and reliable persistence.
+
+## Non-Goals
+
+- Authentication and authorization flows.
+- Distributed caching or multi-region deployment.
+- QR code generation, billing, or admin workflows.
+- Large-scale platform operationalization beyond assessment needs.
+
+---
+
+# Requirements and Constraints
+
+## Requirements
+
+- Create, store, retrieve, redirect, update, and delete shortened URLs.
+- Validate URLs and reject malformed or unsupported input.
+- Preserve data integrity and unique short codes.
+- Support unit and integration testing.
+
+## Constraints
+
+- Limited assessment time.
+- AI-generated outputs must be reviewed before acceptance.
+- PostgreSQL is used for persistence.
+- The solution should stay simple while still demonstrating enterprise engineering quality.
+
+---
+
+# Proposed Approach and Architecture
+
+The solution follows a layered Spring Boot architecture:
+
+- Controller layer for HTTP handling.
+- Service layer for business logic.
+- Repository layer for persistence.
+- Model / DTO layer for request and response contracts.
+
+This approach aligns with the architecture documentation and keeps concerns separated for testability and future change. The application uses REST APIs, dependency injection, and a relational database to support clean, maintainable implementation.
+
+---
+
+# Alternatives Considered
+
+Several implementation choices were considered before settling on the final approach:
+
+| Alternative | Why It Was Not Chosen |
+|---|---|
+| Single-layer or monolithic implementation | Harder to test, maintain, and extend. |
+| In-memory storage only | Not suitable for persistence or realistic assessment expectations. |
+| Heavy microservices split | Too much overhead for the scope of the assessment. |
+| AI-only implementation with minimal review | Too risky for correctness, security, and production readiness. |
+| Distributed cache first | Not required for the current requirements and increases complexity. |
+
+The layered Spring Boot approach was selected because it provides the best balance of clarity, maintainability, and assessment fit.
+
+---
+
+# Rollout, Validation, and Testing
+
+Rollout is treated as a controlled assessment deployment rather than a full production release.
+
+## Rollout
+
+- Build and package with Maven.
+- Deploy against a configured PostgreSQL instance.
+- Verify Swagger/OpenAPI and API endpoints are reachable.
+
+## Validation
+
+- Confirm request/response contracts.
+- Validate persistence and database state.
+- Review AI-generated content manually before acceptance.
+
+## Testing
+
+- Unit testing for isolated business logic.
+- Integration testing for API and database interaction.
+- Validation testing for bad input and schema rules.
+- Regression and smoke testing for release confidence.
+
+---
+
+# Quality Gates
+
+The solution must meet the following quality gates before being considered complete:
+
+| Gate | Criteria |
+|---|---|
+| Requirements coverage | Functional requirements from `REQUIREMENT_ANALYSIS.md` are addressed. |
+| Architecture alignment | Implementation follows the layered design in `ARCHITECTURE.md`. |
+| Code review | AI-generated and human-written changes are reviewed before acceptance. |
+| Test completion | Unit, integration, validation, and regression checks are executed. |
+| Security review | Input validation and injection risks are addressed. |
+| Maintainability | Code follows the documented coding standards. |
+| Deployment readiness | Build and runtime configuration are suitable for controlled deployment. |
+
+These gates provide a clear pass/fail boundary for engineering quality and release confidence.
+
+---
+
+# Agile Delivery Approach
+
+The assessment was approached using an Agile mindset with iterative delivery, continuous refinement, and frequent validation of requirements and outputs.
+
+Key Agile practices applied:
+
+- Short planning cycles with incremental progress.
+- Prioritization of high-value features and risks first.
+- Continuous review of AI-generated artifacts before acceptance.
+- Regular validation of implementation against requirements.
+- Adaptation of design and tests as understanding improved.
+
+This Agile approach ensured the solution remained responsive to requirement clarification while preserving engineering discipline.
+
+---
+
 # AI Assisted Software Development Lifecycle
 
 The project follows an AI-assisted SDLC where Generative AI is used throughout different stages of software engineering.
@@ -157,6 +289,58 @@ Testing ensures that AI-generated implementations behave as expected.
 
 ---
 
+# Testing Strategy
+
+The testing strategy is designed to verify functionality, reliability, and resilience before release.
+
+Core testing layers:
+
+- Unit testing for isolated business logic.
+- Integration testing for API and database interaction.
+- Validation testing for request and response rules.
+- Exception testing for controlled failure handling.
+- Regression testing for core user flows.
+- Smoke testing for rapid release confidence.
+
+This strategy ensures the solution is testable, repeatable, and suitable for quality assurance review.
+
+---
+
+# Coding Standards
+
+The implementation follows structured coding standards to keep the solution maintainable and reviewable.
+
+Standards applied:
+
+- Consistent naming conventions for classes, methods, and variables.
+- Separation of concerns across controller, service, repository, and model layers.
+- Clear validation and exception handling.
+- Use of dependency injection rather than hard-coded dependencies.
+- Small, focused methods with readable logic.
+- Preferential use of established framework conventions.
+- Testable design with mockable dependencies.
+
+These standards support long-term maintainability and reduce the risk of AI-generated inconsistency.
+
+---
+
+# Deployment Considerations
+
+The solution is designed for straightforward deployment in a Spring Boot environment.
+
+Deployment assumptions and practices:
+
+- Maven-based build and packaging.
+- Configuration externalized for environment-specific values.
+- PostgreSQL used as the backing store.
+- Swagger/OpenAPI available for API discovery and verification.
+- Logging and validation enabled for operational support.
+- Suitable for local, test, and future production-style deployment paths.
+
+Although this assessment does not require full production rollout, the design supports deployment readiness and environment portability.
+
+---
+
 # AI Usage Strategy
 
 Generative AI was used in areas where it provides the highest productivity gains.
@@ -252,21 +436,3 @@ Several technology decisions were made before implementation.
 | Layered Architecture | Improves maintainability and separation of concerns |
 | JUnit & Mockito | Standard testing framework for Java applications |
 | GitHub Copilot & Claude | Accelerate implementation while retaining engineering control |
-
----
-
-# Lessons Learned
-
-This assessment reinforces an important engineering principle:
-
-> **The value of Generative AI is not measured by how much code it generates, but by how effectively engineers can guide, validate, and integrate its output into high-quality software systems.**
-
-AI significantly improves engineering productivity when combined with structured problem decomposition, architectural thinking, and disciplined human validation.
-
----
-
-# Conclusion
-
-This solution demonstrates an AI-assisted engineering workflow that combines modern software development practices with responsible use of Generative AI.
-
-The objective was not only to build a functional application, but also to showcase an engineering process that is scalable, maintainable, and aligned with enterprise software development standards.
