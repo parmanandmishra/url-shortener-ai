@@ -9,15 +9,23 @@ This document provides a comprehensive explanation of the URL Shortener applicat
 ## Table of Contents
 
 1. [Architecture Overview](#architecture-overview)
-2. [Layered Architecture](#layered-architecture)
-3. [Component Interactions](#component-interactions)
-4. [Data Models](#data-models)
-5. [Design Patterns](#design-patterns)
-6. [Database Design](#database-design)
-7. [Error Handling](#error-handling)
-8. [Scalability & Performance](#scalability--performance)
-9. [Security Considerations](#security-considerations)
-10. [Future Enhancements](#future-enhancements)
+2. [Tools](#tools)
+3. [Execution Approach](#execution-approach)
+4. [Control Flow](#control-flow)
+5. [Components](#components)
+6. [Project Structure](#project-structure)
+7. [Backend Package Structure](#backend-package-structure)
+8. [Reference Architecture Diagrams](#reference-architecture-diagrams)
+9. [Key Decisions](#key-decisions)
+10. [Layered Architecture](#layered-architecture)
+11. [Component Interactions](#component-interactions)
+12. [Data Models](#data-models)
+13. [Design Patterns](#design-patterns)
+14. [Database Design](#database-design)
+15. [Error Handling](#error-handling)
+16. [Scalability & Performance](#scalability--performance)
+17. [Security Considerations](#security-considerations)
+18. [Future Enhancements](#future-enhancements)
 
 ---
 
@@ -30,10 +38,53 @@ This document provides a comprehensive explanation of the URL Shortener applicat
 | **Framework** | Spring Boot | 3.3.4 |
 | **Language** | Java | 21 |
 | **Database** | PostgreSQL | 12+ |
+| **Client (Optional)** | React + Material UI | Current project baseline |
 | **Build Tool** | Maven | 3.8+ |
 | **API Docs** | OpenAPI/Swagger | 3.0 |
 | **Data Validation** | Hibernate Validator | 8.0+ |
 | **ORM** | Hibernate/JPA | 6.0+ |
+
+---
+
+## Tools
+
+The following implementation and delivery tools are used across design, build, quality, and operations:
+
+| Category | Tools |
+|---|---|
+| Development | IntelliJ IDEA / VS Code, GitHub Copilot |
+| Runtime | Java 21, Spring Boot 3.x |
+| Build & Dependency | Maven |
+| API Design & Docs | Swagger UI, OpenAPI 3 |
+| Data & Persistence | PostgreSQL (target), H2 (local/test), Spring Data JPA, Hibernate |
+| Testing | JUnit 5, Mockito, MockMvc |
+| Source Control | Git, GitHub |
+
+---
+
+## Execution Approach
+
+The application executes using a layered request-processing approach:
+
+1. **Client request enters controller** (`UrlController`) with payload validation.
+2. **Business logic executes in service** (`UrlService`) for URL validation, expiry checks, and short-code generation.
+3. **Persistence operations run via repository** (`UrlRepository`) under transaction boundaries.
+4. **Response DTOs are returned** with consistent schema and status codes.
+5. **Central exception handling** (`GlobalExceptionHandler`) translates domain exceptions into API error responses.
+
+This approach keeps HTTP concerns, business rules, and data access concerns separated and testable.
+
+---
+
+## Control Flow
+
+The control flow is deterministic and exception-driven:
+
+- **Create Flow**: `POST /api/urls/shorten` → validate request → normalize/validate URL + expiry → generate short code → persist → return `201`.
+- **Resolve/Read Flow**: `GET /api/urls/{shortCode}` → fetch mapping → check expiry → return `200` or `410` (expired) / `404` (missing).
+- **Redirect Flow**: `GET /api/urls/redirect/{shortCode}` → fetch mapping → check expiry → increment click count → return original URL.
+- **Analytics Flow**: `GET /api/urls/analytics/{shortCode}` → fetch mapping → check expiry → return analytics payload.
+- **Error Flow**: domain exceptions (`InvalidUrlException`, `UrlNotFoundException`, `UrlExpiredException`) are converted to standardized JSON error responses by controller advice.
 
 ---
 
@@ -161,6 +212,67 @@ The application follows a **Layered (N-Tier) Architecture** pattern:
 │  • Constraints                                 │
 └─────────────────────────────────────────────────┘
 ```
+
+---
+
+## Project Structure
+
+```text
+url-shortener-ai/
+├── backend/
+│   ├── src/main/java/com/pm/urlshortener/
+│   │   ├── controller/
+│   │   ├── service/
+│   │   ├── repository/
+│   │   ├── entity/
+│   │   ├── dto/
+│   │   ├── exception/
+│   │   ├── config/
+│   │   └── util/
+│   └── src/test/java/com/pm/urlshortener/
+├── Docs/
+└── README.md
+```
+
+---
+
+## Backend Package Structure
+
+```text
+com.pm.urlshortener
+├── controller
+├── service
+├── repository
+├── entity
+├── dto
+├── exception
+├── config
+└── util
+```
+
+---
+
+## Reference Architecture Diagrams
+
+The detailed visual diagrams maintained with the solution artifacts are:
+
+- `images/Architecture.png` (high-level architecture)
+- `images/RequestFlow.png` (request lifecycle)
+- `images/Database.png` (database design)
+
+---
+
+## Key Decisions
+
+Key architectural decisions are summarized below (full rationale is captured in the ADR section):
+
+| Decision | Why it was chosen | Tradeoff |
+|---|---|---|
+| Layered architecture | Clear separation of concerns and testability | Extra layer traversal overhead |
+| 6-char random short code + uniqueness retry | Compact URLs with practical uniqueness | Retry latency under collisions |
+| Nullable `expiryDate` (`NULL = never expires`) | Backward compatibility and flexibility | Additional null-handling logic |
+| Centralized exception handling | Consistent API error contract | Requires disciplined exception taxonomy |
+| Service-owned validation | Keeps controller thin and reusable rules | Validation duplicated if not centralized carefully |
 
 ---
 

@@ -1,0 +1,68 @@
+name: Quality Gates
+
+on:
+  pull_request:
+  push:
+    branches: [ main ]
+
+jobs:
+  backend-quality-gates:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Java 21
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '21'
+          cache: maven
+
+      - name: Run unit tests
+        working-directory: backend
+        run: mvn -B test
+
+      - name: Build package
+        working-directory: backend
+        run: mvn -B -DskipTests package
+
+      - name: Setup Node for Newman
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install Newman
+        run: npm install -g newman
+
+      - name: Start application
+        working-directory: backend
+        run: |
+          nohup mvn -B spring-boot:run > ../app.log 2>&1 &
+          echo $! > ../app.pid
+
+      - name: Wait for health endpoint
+        run: |
+          for i in {1..60}; do
+            code=$(curl -s -o /dev/null -w "%{http_code}" http://localhost:8080/actuator/health || true)
+            if [ "$code" = "200" ]; then
+              echo "Application is healthy"
+              exit 0
+            fi
+            sleep 2
+          done
+          echo "Application did not become healthy in time"
+          tail -n 200 app.log || true
+          exit 1
+
+      - name: Run Postman collection
+        run: newman run postman/URLShortener.postman_collection.json --env-var baseUrl=http://localhost:8080
+
+      - name: Stop application
+        if: always()
+        run: |
+          if [ -f app.pid ]; then
+            kill "$(cat app.pid)" || true
+          fi

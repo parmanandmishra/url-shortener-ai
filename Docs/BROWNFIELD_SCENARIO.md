@@ -1,12 +1,6 @@
 # Brownfield Development Scenario
 
-## Objective
 
-This section demonstrates how AI can assist in enhancing an existing application.
-
-Unlike Greenfield development, Brownfield engineering requires understanding an existing codebase before making changes.
-
----
 
 # Scenario
 
@@ -32,13 +26,47 @@ Prompt
 
 AI Identified
 
-- Database
-- Entity
-- Repository
-- Service
-- Controller
-- Unit Tests
-- Swagger Documentation
+1. **Database schema/data model**
+    - `urls.expiry_date` column semantics (nullable vs required), indexing, migration/backfill strategy, cleanup policy.
+
+2. **Domain entity**
+    - `backend/src/main/java/com/pm/urlshortener/entity/UrlMapping.java` (`expiryDate` field + index behavior).
+
+3. **API request/response contracts (DTOs)**
+    - `UrlRequestDto` (to accept expiration input if user-configurable).
+    - `UrlResponseDto`, `UrlAnalyticsDto` (expiration visibility in responses).
+
+4. **Repository layer**
+    - `backend/src/main/java/com/pm/urlshortener/repository/UrlRepository.java`
+    - Expired/active query methods, cleanup/batch operations.
+
+5. **Service layer (core business logic)**
+    - `backend/src/main/java/com/pm/urlshortener/service/UrlService.java`
+    - Expiry validation on resolve/redirect, create/update expiry rules, optional cleanup/extension logic.
+
+6. **Controller/API behavior**
+    - `backend/src/main/java/com/pm/urlshortener/controller/UrlController.java`
+    - Expired URL behavior per endpoint (especially redirect/read), status contract (`404` vs `410 Gone` decision), Swagger annotations.
+
+7. **Exception model + global error handling**
+    - `backend/src/main/java/com/pm/urlshortener/exception/*`
+    - If `410 Gone` is required, add/route dedicated expiration exception in `GlobalExceptionHandler`.
+
+8. **Automated tests**
+    - Service/controller/repository tests for: expired vs non-expired, boundary dates, create/update with expiry, analytics behavior, error status mapping.
+
+9. **API documentation and test artifacts**
+    - `Docs/API_DOCUMENTATION.md`, `Docs/API_TEST_PLAN.md`, Swagger/OpenAPI responses/examples, execution/report docs.
+
+10. **Configuration & operations**
+- `application.properties` feature toggles/default TTL/max TTL, scheduled cleanup cadence, retention behavior.
+
+11. **Background maintenance jobs (if enabled)**
+- Scheduler/cleanup component for expired records, batching, transactional safety.
+
+12. **Observability & compatibility**
+- Logging/metrics for expiration events and cleanup jobs.
+- Client impact/versioning if response semantics change (notably `404` → `410`).
 
 Human Validation
 

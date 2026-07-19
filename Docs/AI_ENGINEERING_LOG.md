@@ -2,455 +2,246 @@
 
 ## Objective
 
-This document captures how Generative AI was used throughout the Software Development Lifecycle.
-
-AI was used as an engineering accelerator rather than an autonomous developer.
-
-All generated outputs were reviewed and validated before implementation.
+This document captures how Generative AI was used across the SDLC for the URL Shortener assessment. AI was used as an accelerator, while design, implementation decisions, and production-readiness accountability remained with the human engineer.
 
 ---
 
-# AI Tools
+## AI Tools
 
 - GitHub Copilot
 - Claude
 
 ---
 
-# AI Usage Summary
+## AI Usage Summary
 
 | SDLC Activity | AI Used | Human Review |
-|--------------|----------|--------------|
+|---|---|---|
 | Requirement Analysis | Yes | Yes |
 | Task Decomposition | Yes | Yes |
 | Architecture Brainstorming | Yes | Yes |
-| Entity Generation | Yes | Yes |
-| DTO Generation | Yes | Yes |
-| Repository Generation | Yes | Yes |
-| Controller Generation | Yes | Yes |
-| Unit Tests | Yes | Yes |
-| Documentation | Yes | Yes |
-| Final Validation | No | Human Only |
+| Entity/DTO/Controller Drafting | Yes | Yes |
+| Unit Test Drafting | Yes | Yes |
+| API Documentation Drafting | Yes | Yes |
+| Final Validation & Approval | No | Human Only |
 
 ---
 
-# AI Prompt Log
+## Prompt Engineering Standard (Applied)
 
-## Prompt 1 - Generate Requirement Document
+Each prompt follows the structure below for repeatability and auditability:
 
-Objective
-
-Requirement Analysis
-
-Prompt
-
-Read the assessment requirements and create a structured requirement analysis.
-
-Separate:
-
-- Functional Requirements
-- Non Functional Requirements
-- Constraints
-- Acceptance Criteria
-- AI Usage Expectations
-
-Output
-Docs/
-01_REQUIREMENT_ANALYSIS.md
-
-Outcome
-
-Requirement document generated.
-
-Decision
-
-Accepted after refinement.
+1. **Role** (e.g., Principal QA Architect, Java Architect)
+2. **Objective**
+3. **Context** (stack, constraints, files)
+4. **Scope** (what to include / exclude)
+5. **Acceptance Criteria** (measurable outcomes)
+6. **Output Contract** (file path, markdown/json format)
+7. **Security Constraints** (no secrets, no unsafe code, no external leaks)
+8. **Traceability Tag** (`PRM-xx`)
 
 ---
 
-## Prompt 2 Generate Task Decomposition
+## Prompt Traceability Register
 
-Objective
-
-Task Decomposition
-
-Prompt
-
-Break this application into engineering tasks.
-
-Outcome
-
-Implementation backlog generated.
-
-Decision
-
-Modified implementation order.
-
----
-
-## Prompt 3 - Design Engineering Approach
-
-Create Engineering Approach for this assessment.
-
-Include
-
-- Agile
-- SDLC
-- AI Assisted Development
-- Coding Standards
-- Testing Strategy
-- Deployment
-
-
-## Prompt 4 - Design Scalable Architecture
-
-
-
-Design scalable Spring Boot architecture.
-
-Use
-
-Hexagonal Architecture
-
-SOLID
-
-Layered Design
-
-Repository Pattern
-
-DTO Pattern
-
-Outcome
-
-Layered architecture proposed.
-
-Decision
-
-Accepted with minor simplifications.
+| ID | Prompt Goal | Key Inputs/References | Output Artifact(s) | Human Decision |
+|---|---|---|---|---|
+| PRM-01 | Generate requirement analysis | Assessment brief | `Docs/REQUIREMENT_ANALYSIS.md` | Accepted with refinement |
+| PRM-02 | Generate engineering task decomposition | Requirements doc | Backlog/task sequence | Re-ordered by engineer |
+| PRM-03 | Draft engineering approach | Requirements + architecture expectations | `Docs/ENGINEERING_APPROACH.md` | Accepted with additions |
+| PRM-04 | Draft scalable architecture | Spring Boot constraints | `Docs/ARCHITECTURE.md` | Accepted with simplifications |
+| PRM-05 | Generate REST controller draft | API scope + HTTP rules | Controller implementation draft | Accepted with fixes |
+| PRM-06 | Generate domain/entity model drafts | JPA + DB constraints | Entity/DTO drafts | Partially accepted |
+| PRM-07 | Generate service layer draft | SOLID + validation + transactions | Service implementation draft | Accepted with corrections |
+| PRM-08 | Generate unit tests | Existing code + test plan | JUnit5/Mockito test classes | Accepted after review |
+| PRM-09 | Generate API documentation | Implemented APIs only | `Docs/API_DOCUMENTATION.md` | Accepted with edits |
+| PRM-10 | Generate enterprise API test plan | Requirements + architecture + API docs | `Docs/API_TEST_PLAN.md` | Accepted with edits |
+| PRM-11 | Execute API validation scenarios | Running endpoints | `Docs/API_EXECUTION_REPORT.md` | Accepted (defects logged) |
+| PRM-12 | Analyze runtime/JMX exception | Error logs + runtime context | Troubleshooting write-up + config updates | Accepted |
+| PRM-13 | Analyze compilation/initialization issue | Build error logs | RCA and remediation actions | Accepted |
+| PRM-14 | Identify coverage gaps and add tests only | Codebase + existing tests | New focused tests + `Docs/CODE_COVERAGE.md` | Accepted |
 
 ---
 
-## Prompt 5 - Generate REST Controller
+## Structured Prompt Log
 
-Intent
+### PRM-01 — Requirement Analysis
+**Objective:** Create structured requirements documentation.  
+**Prompt Pattern:** Role + Context + Required sections + Output file.  
+**Mandatory Sections Requested:** Functional, non-functional, constraints, acceptance criteria, AI usage expectations.  
+**Prompt:**  
+Act as a Senior Product/Engineering Analyst. Analyze the assessment brief and generate `Docs/REQUIREMENT_ANALYSIS.md` with: business goals, functional requirements, non-functional requirements, constraints, acceptance criteria, dependencies, and assumptions. Use only repository context, include traceable requirement IDs, do not add secrets or external proprietary content.  
+**Output:** `Docs/REQUIREMENT_ANALYSIS.md`  
+**Decision:** Accepted after review and refinement.
 
-Generate REST Controller.
+### PRM-02 — Task Decomposition
+**Objective:** Generate execution-ready engineering task breakdown.  
+**Prompt Constraints:** Dependency-aware sequencing, clear ownership boundaries, test-first checkpoints.  
+**Prompt:**  
+Act as an Engineering Manager. Decompose `Docs/REQUIREMENT_ANALYSIS.md` into an implementation backlog with phases, task IDs, dependencies, risk notes, and validation gates. Keep tasks atomic and verifiable. Use only project files and do not propose unsafe shortcuts.  
+**Output:** Backlog/task sequence  
+**Decision:** Re-ordered by engineer.
 
-Constraints
+### PRM-03 — Engineering Approach
+**Objective:** Produce enterprise engineering approach.  
+**Prompt Constraints:** Include Agile, SDLC, AI-assisted development, coding standards, testing strategy, deployment, quality gates.  
+**Prompt:**  
+Act as a Principal Engineer. Produce `Docs/ENGINEERING_APPROACH.md` covering SDLC model, branching/review process, coding standards, test strategy, release controls, quality gates, and AI-assistance governance. Keep it implementation-aligned and auditable, with no speculative architecture beyond repository scope.  
+**Output:** `Docs/ENGINEERING_APPROACH.md`  
+**Decision:** Accepted with gap closure and deduplication.
 
-Prompt
-Generate REST Controller.
+### PRM-04 — Architecture
+**Objective:** Produce scalable architecture design.  
+**Prompt Constraints:** HLD, LLD, sequence flow, components, security, scalability; layered/SOLID patterns.  
+**Prompt:**  
+Act as a Software Architect. Generate `Docs/ARCHITECTURE.md` with HLD, LLD, component diagram narrative, request/control flow, key design decisions, and scalability/security considerations for this Spring Boot URL shortener. Reflect only implemented or clearly marked planned capabilities.  
+**Output:** `Docs/ARCHITECTURE.md`  
+**Decision:** Accepted with added explicit sections.
 
-Use
-- REST conventions
-- Proper HTTP Status codes
-- Validation
-- Swagger annotations
-- Exception handling
+### PRM-05 — REST Controller Draft
+**Objective:** Generate API controller draft aligned to REST semantics.  
+**Prompt Constraints:** Correct mappings, validation entry points, explicit status codes, no business logic leakage.  
+**Prompt:**  
+Act as a Senior Spring Boot Engineer. Draft controller endpoints for URL creation, lookup, redirect, analytics, update, and delete using `ResponseEntity` and explicit HTTP status handling. Keep controller thin, delegate logic to service, and avoid embedding persistence logic.  
+**Output:** Controller implementation draft  
+**Decision:** Accepted with fixes.
 
-Acceptance Criteria
+### PRM-06 — Domain and DTO Model Drafts
+**Objective:** Generate entity/DTO contracts for API and persistence layers.  
+**Prompt Constraints:** JPA-safe mappings, validation-ready DTOs, backward-compatible field semantics.  
+**Prompt:**  
+Act as a Domain Model Architect. Draft JPA entity and DTO models for URL mappings, including required fields, lifecycle timestamps, click count, and optional expiry behavior. Add validation annotations where applicable and ensure field naming aligns across controller/service/repository layers.  
+**Output:** Entity/DTO drafts  
+**Decision:** Partially accepted.
 
-- POST /shorten
-- GET /{code}
+### PRM-07 — Service Layer Draft
+**Objective:** Generate business service implementation with reliability controls.  
+**Prompt Constraints:** Validation, normalization, transaction boundaries, short-code uniqueness, exception-driven flows.  
+**Prompt:**  
+Act as a Principal Java Engineer. Implement service-layer logic for URL normalization/validation, unique short-code generation, create/read/update/delete operations, redirect click counting, and expiry checks. Use transactional boundaries and throw domain exceptions for invalid/not-found/expired states.  
+**Output:** Service implementation draft  
+**Decision:** Accepted with corrections.
 
-Outcome
+### PRM-09 — API Documentation
+**Objective:** Document only implemented APIs.  
+**Prompt Constraints:** Include endpoint contract, status codes, validation rules, error responses, Swagger/OpenAPI details.  
+**Prompt:**  
+Act as a Technical Writer for backend APIs. Update `Docs/API_DOCUMENTATION.md` to match current implementation exactly (no fictional endpoints). Include request/response examples, status codes, validation rules, and known behavior notes with traceability to tests.  
+**Output:** `Docs/API_DOCUMENTATION.md`  
+**Decision:** Accepted with requirements traceability updates.
 
-Controller generated.
+### PRM-08 — Unit Tests
+**Objective:** Generate targeted JUnit5/Mockito coverage for critical paths.  
+**Prompt Constraints:** No production code changes; focus on behavior, exception mapping, boundary inputs.  
+**Prompt:**  
+Act as a Senior Test Engineer. Add missing JUnit5 + Mockito tests for service/controller/exception layers to improve confidence in validation, error paths, and expiry behavior. Do not modify production code; use deterministic test data and explicit assertions.  
+**Output:** JUnit5/Mockito test classes  
+**Decision:** Accepted after review.
 
-Decision
+### PRM-10 — API Test Plan
+**Objective:** Produce enterprise-grade API test plan.  
+**Prompt Constraints:** Positive, negative, boundary, validation, OWASP security, performance, DB validation, RTM, AI-assisted testing section.  
+**Prompt:**  
+Act as a Principal QA Architect. Generate `Docs/API_TEST_PLAN.md` with end-to-end API test strategy, scenario matrix, validation/negative/security/performance coverage, database checks, entry/exit criteria, deliverables, and requirement traceability. Keep scenarios actionable and measurable.  
+**Output:** `Docs/API_TEST_PLAN.md`  
+**Decision:** Accepted with expanded traceability.
 
-Accepted with minor adjustments.
+### PRM-11 — API Execution Validation
+**Objective:** Discover and execute API scenarios with realistic data and report pass/fail reasons.  
+**Prompt Constraints:** No application code changes during execution run; produce markdown execution evidence.  
+**Prompt:**  
+Act as a Senior QA Engineer. Execute discovered API scenarios against running endpoints using realistic payloads and record observed request, response body, status code, pass/fail, and failure reason. Update execution report in markdown with only observed evidence; do not infer unavailable results.  
+**Output:** `Docs/API_EXECUTION_REPORT.md`  
+**Decision:** Accepted; defects tracked from observed behavior.
+
+### PRM-12  — Exception Analysis
+**Objective:** Perform structured RCA on runtime/compile issues.  
+**Prompt Constraints:** Multi-cause analysis, confidence levels, verification steps, no speculative rewrites.  
+**Output:** Troubleshooting analysis and remediations logged in working session/docs.  
+**Decision:** Accepted after verification.
+
+### PRM-13  — Review Reliability Features
+**Objective:** Verify reliability features are implemented.
+**Prompt Constraints:** Review for global exception handling, input validation, structured logging, health endpoint, proper HTTP status codes, transaction management, idempotent behavior, unit tests, API tests.
+**Prompt:** 
+Act as a Principal Java Architect.
+
+Review my Spring Boot project and verify whether the following reliability features are implemented:
+
+- Global exception handling
+- Input validation
+- Structured logging
+- Health endpoint (Spring Boot Actuator)
+- Proper HTTP status codes
+- Transaction management
+- Idempotent behavior (where applicable)
+- Unit tests
+- API tests
+
+For each feature provide:
+
+1. Status (Implemented / Partially Implemented / Not Implemented)
+2. Evidence (class/file/method)
+3. Comments
+4. Recommendation (if missing)
+
+Generate a markdown report named Docs/RELIABILITY_REVIEW.md.
+
+Do not modify any code.
+**Decision:** Accepted after verification.
 
 ---
 
-## Prompt 6 - Generate JPA entity for URL Mapping
+## Secure AI Usage Controls
 
-Objective
+The following controls were applied to all AI interactions:
 
-Repository
-
-Prompt
-
-Generate JPA entity for URL Mapping.
-
-Requirements
-
-UUID id
-
-originalUrl
-
-shortCode
-
-expiryDate
-
-clickCount
-
-createdAt
-
-Use Lombok
-
-Use Validation
-
-Java 21
-
-Outcome
-
-Repository generated.
-
-Decision
-
-Accepted.
+1. **No secrets in prompts**: No credentials, tokens, private keys, or production connection strings were shared.
+2. **Repository-scoped context only**: Prompts referenced local project files and observed logs only.
+3. **No third-party code ingestion**: No proprietary external source code was copied into prompts.
+4. **Principle of least disclosure**: Only the minimum context needed for each task was provided.
+5. **Human approval gate**: AI output was never auto-merged; all changes were reviewed before acceptance.
+6. **Security-first review**: Generated API/error handling/test artifacts were reviewed against OWASP/API security expectations.
+7. **No blind execution**: AI suggestions were validated through tests and runtime checks before being trusted.
 
 ---
 
-## Prompt 6 – Generate Domain Model
-
-Intent:
-Generate entities for URL Shortener.
-
-Context:
-Spring Boot 3.5
-Java 21
-JPA
-PostgreSQL
-
-Constraints
-
-- Follow SOLID principles
-- Use Lombok
-- Use UUID as primary key
-- Validate URL format
-
-Acceptance Criteria
-
-- Clean JPA entities
-- Production-ready
-- No business logic
-
-
-## Prompt 7 –Generate Service Layer.
-
-Prompt
-Generate Service Layer.
-
-Requirements
-
-Logging
-
-Validation
-
-Custom Exceptions
-
-Transaction Management
-
-SOLID
-
-
-## Prompt 9 - Code Quality & Architecture Review
-
-Review this code as if you are a Principal Java Architect.
-Suggest
-Security
-Performance
-Readability
-Maintainability
-Spring Boot best practices
-Do not rewrite unless necessary.
-
-
-## Prompt 9 - Generate API documentations
-
-Analyze my Spring Boot project and generate a professional API_DOCUMENTATION.md.
-
-Document only the implemented REST APIs.
-
-For each API include:
-- Purpose
-- HTTP Method
-- Endpoint
-- Request
-- Response
-- Status Codes
-- Validation Rules
-- Sample Request & Response
-- Error Responses
-
-Also include:
-- API Overview
-- Authentication
-- Error Handling
-- Versioning
-- Swagger/OpenAPI information
-
-Generate clean markdown suitable for Docs/API_DOCUMENTATION.md.
-
-
-## Prompt 10 - Generate API Test Plan
-
-Generate enterprise API Test Plan.
-
-Include
-
-Positive
-
-Negative
-
-Boundary
-
-Security
-
-Performance
-
-Validation
-
-OWASP
-
-
-## Prompt 8 - Generate Unit Tests
-
-Generate JUnit5 tests.
-
-Use Mockito.
-
-Cover
-
-Positive
-
-Negative
-
-Boundary
-
-Repository Failure
-
-
----
-
-## Prompt 8 - Additional API Testing
-
-You are a Principal QA Architect.
-
-Objective:
-Validate the URL Shortener application using AI-assisted testing.
-
-Tasks:
-1. Discover all REST APIs.
-2. Execute:
-- Positive Tests
-- Negative Tests
-- Boundary Tests
-- Validation Tests
-
-
-## Prompt 8 - Code Coverage Analysis
-
-Analyze my Spring Boot project and identify classes with low or no test coverage.
-
-Generate only the missing JUnit 5 and Mockito tests to achieve at least 80% line coverage.
-
-Do not modify production code.
-
-
-
-
-
-# AI Productivity
+## AI Productivity
 
 | Activity | Estimated Improvement |
-|-----------|----------------------|
+|---|---|
 | Requirement Analysis | 30% |
 | Architecture Brainstorming | 25% |
 | Boilerplate Code | 70% |
 | Unit Test Generation | 60% |
 | Documentation | 75% |
-| Refactoring | 40% |
+| Refactoring Support | 40% |
 
-Overall Productivity Improvement
-
-Approximately **45–50%**
+**Overall Productivity Improvement:** Approximately **45–50%**
 
 ---
 
-# Human Validation
+## Human Validation
 
-Every AI-generated artifact was reviewed for
+Every AI-generated artifact was reviewed for:
 
 - Correctness
 - Security
 - Maintainability
 - Performance
 - Readability
-- Coding Standards
+- Coding standards compliance
 
-No AI-generated code was accepted without review.
+No AI-generated change was accepted without human review.
 
 ---
 
-# Key Engineering Learning
+## AI Mistakes and Engineering Corrections
 
-Generative AI significantly improves engineering productivity when combined with
+| AI Suggestion | Issue Found | Engineering Decision |
+|---|---|---|
+| Generated random short code without robust uniqueness guarantees | Collision risk | Added unique DB constraint + retry logic |
+| Missed strict URL validation behavior | Security and data quality risk | Added stronger validation/normalization and tests |
+| Generated generic exception handling | Poor API error contract | Implemented structured `@ControllerAdvice` responses |
 
-- Structured problem decomposition
-- Strong architectural thinking
-- Human engineering judgement
-- Continuous validation
-
-# AI Mistakes & Corrections
-
-| AI Suggestion                                        | Issue Found        | Engineering Decision                                              |
-| ---------------------------------------------------- | ------------------ | ----------------------------------------------------------------- |
-| Generated random short code without uniqueness check | Risk of collisions | Added database unique constraint and retry mechanism              |
-| Missed URL validation                                | Security risk      | Added validation using `@URL` and custom validator                |
-| Generated generic exception handling                 | Poor API design    | Implemented `@ControllerAdvice` with meaningful HTTP status codes |
-
-
-## Prompt 12 - Exception Analysis
-You are a Principal Java Architect and Production Support Engineer.
-
-Analyze the following exception as if this occurred in a production Spring Boot application.
-
-Application Details:
-- Java 21
-- Spring Boot 3.5
-- Maven
-- IntelliJ IDEA
-- PostgreSQL
-- REST APIs
-- Running locally on macOS
-
-Exception:
-
-java.io.IOException: The server sockets created using the LocalRMIServerSocketFactory only accept connections from clients running on the host where the RMI remote objects have been exported.
-at jdk.management.agent/sun.management.jmxremote.LocalRMIServerSocketFactory$1.accept(LocalRMIServerSocketFactory.java:114)
-at java.rmi/sun.rmi.transport.tcp.TCPTransport$AcceptLoop.executeAcceptLoop(TCPTransport.java:424)
-at java.rmi/sun.rmi.transport.tcp.TCPTransport$AcceptLoop.run(TCPTransport.java:388)
-at java.base/java.lang.Thread.run(Thread.java:1583)
-
-Please provide:
-
-1. Executive Summary (2-3 lines)
-2. Root Cause Analysis
-3. Why this error occurs
-4. Is it a framework issue, JVM issue, Spring Boot issue, IntelliJ issue, or application code issue?
-5. Is this error blocking application functionality or only a warning?
-6. Common scenarios where this happens.
-7. How to reproduce it.
-8. Step-by-step troubleshooting process.
-9. Recommended fixes (ordered from most likely to least likely).
-10. How to verify the fix.
-11. Best practices to avoid this issue in production.
-12. Whether this issue can be safely ignored during local development.
-13. Confidence level for each possible root cause.
-
-Do not immediately assume a single cause.
-Provide reasoning for each possible cause and explain how to validate it.
-Return the answer in a structured markdown format suitable for documenting in an engineering troubleshooting guide.
-
-## Prmopt 13 - Exception Analysis
-
-Analyze this compilation error.
-“java: java.lang.ExceptionInInitializerError
-com.sun.tools.javac.code.TypeTag :: UNKNOWN”
-
-Suggest root cause.
-Do not rewrite code.
-Only explain issue.
+---

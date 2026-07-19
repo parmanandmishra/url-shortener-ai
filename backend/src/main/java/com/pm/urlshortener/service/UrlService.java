@@ -5,6 +5,7 @@ import com.pm.urlshortener.dto.UrlRequestDto;
 import com.pm.urlshortener.dto.UrlResponseDto;
 import com.pm.urlshortener.entity.UrlMapping;
 import com.pm.urlshortener.exception.InvalidUrlException;
+import com.pm.urlshortener.exception.UrlExpiredException;
 import com.pm.urlshortener.exception.UrlNotFoundException;
 import com.pm.urlshortener.repository.UrlRepository;
 import org.slf4j.Logger;
@@ -17,8 +18,6 @@ import java.net.URISyntaxException;
 import java.net.URL;
 import java.security.SecureRandom;
 import java.time.LocalDateTime;
-import java.util.Optional;
-
 @Service
 @Transactional
 public class UrlService {
@@ -39,6 +38,7 @@ public class UrlService {
     public UrlResponseDto createShortUrl(UrlRequestDto request) {
         String originalUrl = normalizeUrl(request.getOriginalUrl());
         validateUrl(originalUrl);
+        validateExpiryDate(request.getExpiryDate());
 
         String shortCode = generateUniqueShortCode();
 
@@ -46,6 +46,7 @@ public class UrlService {
                 .originalUrl(originalUrl)
                 .shortCode(shortCode)
                 .createdDate(LocalDateTime.now())
+                .expiryDate(request.getExpiryDate())
                 .clickCount(0L)
                 .build();
 
@@ -88,7 +89,9 @@ public class UrlService {
 
         String normalizedUrl = normalizeUrl(request.getOriginalUrl());
         validateUrl(normalizedUrl);
+        validateExpiryDate(request.getExpiryDate());
         urlMapping.setOriginalUrl(normalizedUrl);
+        urlMapping.setExpiryDate(request.getExpiryDate());
 
         UrlMapping updatedUrl = urlRepository.save(urlMapping);
         logger.info("Updated URL with id: {}", id);
@@ -107,10 +110,16 @@ public class UrlService {
                 .orElseThrow(() -> new UrlNotFoundException("Short URL not found: " + shortCode));
 
         if (urlMapping.getExpiryDate() != null && urlMapping.getExpiryDate().isBefore(LocalDateTime.now())) {
-            throw new UrlNotFoundException("Short URL has expired: " + shortCode);
+            throw new UrlExpiredException("Short URL has expired: " + shortCode);
         }
 
         return urlMapping;
+    }
+
+    private void validateExpiryDate(LocalDateTime expiryDate) {
+        if (expiryDate != null && !expiryDate.isAfter(LocalDateTime.now())) {
+            throw new InvalidUrlException("expiryDate must be a future date-time");
+        }
     }
 
     private String generateUniqueShortCode() {

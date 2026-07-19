@@ -46,8 +46,7 @@ While Generative AI was used to accelerate development, every architectural deci
 - Spring Boot
 - Spring Data JPA
 - Maven
-- PostgreSQL
-- Lombok
+- H2 (local runtime) / PostgreSQL (target architecture)
 - Swagger / OpenAPI
 
 ## Frontend
@@ -74,7 +73,7 @@ url-shortener-ai/
 │
 ├── backend/
 ├── frontend/
-├── docs/
+├── Docs/
 ├── screenshots/
 ├── tests/
 └── README.md
@@ -84,7 +83,7 @@ url-shortener-ai/
 
 # Documentation
 
-Detailed engineering documents are available under the **docs** folder.
+Detailed engineering documents are available under the **Docs** folder.
 
 | Document | Description |
 |----------|-------------|
@@ -134,36 +133,61 @@ The solution follows the following engineering principles:
 
 ---
 
-# How to Run
+# Setup Instructions
 
-## Backend
+## Prerequisites
+
+- Java 21
+- Maven 3.8+
+- Node.js 18+ and npm (for frontend)
+- Git
+
+## 1. Clone Repository
 
 ```bash
-mvn clean install
+git clone <your-repo-url>
+cd url-shortener-ai
+```
 
+## 2. Backend Setup and Run
+
+```bash
+cd backend
+mvn clean install
 mvn spring-boot:run
 ```
 
-Backend runs on
+Backend URL:
 
 ```
 http://localhost:8080
 ```
 
----
-
-## Frontend
+## 3. Frontend Setup and Run
 
 ```bash
+cd frontend
 npm install
-
 npm start
 ```
 
-Runs on
+Frontend URL:
 
 ```
 http://localhost:3000
+```
+
+## 4. Verify API Access
+
+- Swagger UI: `http://localhost:8080/swagger-ui.html`
+- OpenAPI JSON: `http://localhost:8080/v3/api-docs`
+
+## 5. Run Tests
+
+From `backend/`:
+
+```bash
+mvn test
 ```
 
 ---
@@ -173,7 +197,7 @@ http://localhost:3000
 Swagger UI
 
 ```
-http://localhost:8080/swagger-ui/index.html
+http://localhost:8080/swagger-ui.html
 ```
 
 ---
@@ -183,6 +207,7 @@ http://localhost:8080/swagger-ui/index.html
 Run all unit tests
 
 ```bash
+cd backend
 mvn test
 ```
 
@@ -194,39 +219,36 @@ mvn verify
 
 ---
 
-# Future Enhancements
+## Reliability Features
 
-Potential future improvements include:
+Implemented:
+- Global exception handling using @ControllerAdvice
+- Bean Validation for request validation
+- Structured logging
+- Health monitoring via Spring Boot Actuator
+- Consistent HTTP error responses
+- Transactional database operations
+- Unit and API testing
 
-- Redis Caching
-- Distributed Short Code Generation
-- Kubernetes Deployment
-- Authentication & Authorization
-- QR Code Generation
+Future Enhancements:
+- Circuit Breaker
+- Retry Policies
 - Rate Limiting
-- Monitoring & Observability
-- Cloud Deployment
-- Event-driven Analytics
+- Monitoring and Alerting
+- Distributed Tracing
 
 ---
 
-# Assessment Focus
+# Limitations
 
-This project demonstrates:
+Current implementation limitations:
 
-- Software Architecture
-- AI-assisted Software Development
-- Engineering Decision Making
-- Modern Java Development
-- REST API Design
-- Clean Code
-- Testing Strategy
-- Production Readiness
+1. Authentication and authorization are not implemented (open API access).
+2. Rate limiting is not implemented.
+3. Some invalid-request paths are still being hardened for strict `400/404/405` semantics (see `Docs/API_EXECUTION_REPORT.md`).
+4. No distributed cache layer (e.g., Redis) is included yet.
+5. Deployment is local/developer-focused; no production infrastructure-as-code in this repository.
+6. Analytics are basic (click count focused) and not event-stream based.
+7. Data retention/cleanup jobs are minimal and can be expanded for enterprise scale.
 
 ---
-
-# Thank You
-
-Thank you for reviewing my submission.
-
-This assessment was completed using a combination of engineering expertise and AI-assisted development practices while ensuring that all AI-generated outputs were critically reviewed, validated, and refined before implementation.

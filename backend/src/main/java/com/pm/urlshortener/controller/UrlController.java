@@ -27,7 +27,7 @@ public class UrlController {
     }
 
     @PostMapping("/shorten")
-    @Operation(summary = "Create a short URL", description = "Convert a long URL to a short URL")
+    @Operation(summary = "Create a short URL", description = "Convert a long URL to a short URL. Optionally set expiryDate to auto-expire the short URL.")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "201", description = "Short URL created successfully",
                     content = @Content(mediaType = "application/json", schema = @Schema(implementation = UrlResponseDto.class))),
@@ -39,12 +39,14 @@ public class UrlController {
         return new ResponseEntity<>(response, HttpStatus.CREATED);
     }
 
+
     @GetMapping("/{shortCode}")
     @Operation(summary = "Get URL details by short code", description = "Retrieve the original URL details associated with a short code")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "URL found",
                     content = @Content(mediaType = "application/json", schema = @Schema(implementation = UrlResponseDto.class))),
             @ApiResponse(responseCode = "404", description = "Short URL not found"),
+            @ApiResponse(responseCode = "410", description = "Short URL has expired"),
             @ApiResponse(responseCode = "500", description = "Internal server error")
     })
     public ResponseEntity<UrlResponseDto> getUrlByShortCode(
@@ -59,6 +61,7 @@ public class UrlController {
             @ApiResponse(responseCode = "200", description = "Original URL retrieved",
                     content = @Content(mediaType = "application/json")),
             @ApiResponse(responseCode = "404", description = "Short URL not found"),
+            @ApiResponse(responseCode = "410", description = "Short URL has expired"),
             @ApiResponse(responseCode = "500", description = "Internal server error")
     })
     public ResponseEntity<String> redirectToOriginalUrl(@PathVariable String shortCode) {
@@ -81,7 +84,7 @@ public class UrlController {
     }
 
     @PutMapping("/{id}")
-    @Operation(summary = "Update URL", description = "Update the original URL associated with a given ID")
+    @Operation(summary = "Update URL", description = "Update the original URL and optional expiryDate associated with a given ID")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "URL updated successfully",
                     content = @Content(mediaType = "application/json", schema = @Schema(implementation = UrlResponseDto.class))),

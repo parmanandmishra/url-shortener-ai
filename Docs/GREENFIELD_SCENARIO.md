@@ -46,10 +46,6 @@ Documentation
 
 AI was used to summarize the problem statement and identify the functional and non-functional requirements.
 
-Example Prompt
-
-> Analyze the following requirements and identify Functional Requirements, Non Functional Requirements, Assumptions and Risks.
-
 Outcome
 
 - Functional requirements identified
@@ -67,9 +63,6 @@ Reviewed and refined before documentation.
 
 Instead of asking AI to build the entire application, the problem was divided into smaller engineering tasks.
 
-Example Prompt
-
-> Break the URL Shortener implementation into independent engineering tasks.
 
 Outcome
 
@@ -92,11 +85,6 @@ Tasks reordered based on implementation priority.
 
 AI was used for architecture brainstorming.
 
-Example Prompt
-
-> Suggest a scalable architecture for a Spring Boot URL Shortener.
-
-Outcome
 
 Generated
 
@@ -143,11 +131,3 @@ Tests were reviewed and modified before execution.
 AI was intentionally used for repetitive engineering work while architecture, business logic and final engineering decisions remained under human control.
 
 This ensured high productivity without compromising software quality.
-
----
-
-# Lessons Learned
-
-Breaking the implementation into smaller engineering tasks significantly improved AI output quality.
-
-Human review remained essential for validating correctness, maintainability and production readiness.

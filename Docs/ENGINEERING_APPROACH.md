@@ -97,6 +97,24 @@ The layered Spring Boot approach was selected because it provides the best balan
 
 ---
 
+# Trade-offs
+
+The engineering approach intentionally prioritizes clarity and reliability over premature optimization.  
+Key trade-offs accepted for this assessment are:
+
+| Decision | Benefit | Trade-off |
+|---|---|---|
+| Layered architecture over minimal single-layer design | Better separation of concerns, testability, and maintainability | Slightly more boilerplate and call-path overhead |
+| Relational persistence over in-memory-only storage | Durable, queryable, and realistic data model | More setup/configuration complexity |
+| Strong validation and explicit error handling | Safer API contracts and predictable behavior | Additional implementation effort and broader test surface |
+| AI-assisted generation with mandatory human review | Faster delivery with quality control | Review/refinement overhead reduces raw speed |
+| Keep scope focused (no auth/rate limiting/microservices in core) | Faster completion of high-priority requirements | Some enterprise capabilities deferred to future phases |
+| Optional expiry support with nullable field | Backward compatibility and flexible business behavior | Extra branching logic and edge-case testing |
+
+These trade-offs were chosen to maximize assessment value while maintaining production-oriented engineering discipline.
+
+---
+
 # Rollout, Validation, and Testing
 
 Rollout is treated as a controlled assessment deployment rather than a full production release.
@@ -132,7 +150,9 @@ The solution must meet the following quality gates before being considered compl
 | Architecture alignment | Implementation follows the layered design in `ARCHITECTURE.md`. |
 | Code review | AI-generated and human-written changes are reviewed before acceptance. |
 | Test completion | Unit, integration, validation, and regression checks are executed. |
+| CI automation gate | GitHub Actions workflow (`.github/workflows/quality-gates.yml`) runs Maven tests, package build, actuator health verification, and Newman API collection run. |
 | Security review | Input validation and injection risks are addressed. |
+| HTTP contract safety | Explicit exception mappings are enforced for malformed JSON, method mismatch, media-type mismatch, not-found, and expired-resource conditions. |
 | Maintainability | Code follows the documented coding standards. |
 | Deployment readiness | Build and runtime configuration are suitable for controlled deployment. |
 

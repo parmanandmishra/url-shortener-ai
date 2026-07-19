@@ -5,6 +5,7 @@ import com.pm.urlshortener.dto.UrlRequestDto;
 import com.pm.urlshortener.dto.UrlResponseDto;
 import com.pm.urlshortener.entity.UrlMapping;
 import com.pm.urlshortener.exception.InvalidUrlException;
+import com.pm.urlshortener.exception.UrlExpiredException;
 import com.pm.urlshortener.exception.UrlNotFoundException;
 import com.pm.urlshortener.repository.UrlRepository;
 import org.junit.jupiter.api.BeforeEach;
@@ -60,6 +61,41 @@ class UrlServiceTest {
         assertEquals(urlMapping.getId(), response.getId());
         assertEquals(urlMapping.getOriginalUrl(), response.getOriginalUrl());
         verify(urlRepository, times(1)).save(any(UrlMapping.class));
+    }
+
+    @Test
+    void testCreateShortUrl_WithExpiryDate_Success() {
+        LocalDateTime futureExpiry = LocalDateTime.now().plusDays(3);
+        urlRequest.setExpiryDate(futureExpiry);
+        when(urlRepository.existsByShortCode(anyString())).thenReturn(false);
+        UrlMapping mappingWithExpiry = UrlMapping.builder()
+                .id(1L)
+                .originalUrl("https://www.example.com")
+                .shortCode("abc123")
+                .createdDate(LocalDateTime.now())
+                .expiryDate(futureExpiry)
+                .clickCount(0L)
+                .build();
+        when(urlRepository.save(any(UrlMapping.class))).thenReturn(mappingWithExpiry);
+
+        UrlResponseDto response = urlService.createShortUrl(urlRequest);
+
+        assertNotNull(response.getExpiryDate());
+        assertEquals(futureExpiry, response.getExpiryDate());
+    }
+
+    @Test
+    void testCreateShortUrl_WithPastExpiryDate_Fails() {
+        urlRequest.setExpiryDate(LocalDateTime.now().minusMinutes(1));
+        InvalidUrlException ex = assertThrows(InvalidUrlException.class, () -> urlService.createShortUrl(urlRequest));
+        assertEquals("expiryDate must be a future date-time", ex.getMessage());
+    }
+
+    @Test
+    void testCreateShortUrl_WithCurrentTimeExpiryDate_Fails() {
+        urlRequest.setExpiryDate(LocalDateTime.now());
+        InvalidUrlException ex = assertThrows(InvalidUrlException.class, () -> urlService.createShortUrl(urlRequest));
+        assertEquals("expiryDate must be a future date-time", ex.getMessage());
     }
 
     @Test
@@ -156,6 +192,7 @@ class UrlServiceTest {
 
     @Test
     void testGetUrlByShortCode_Success() {
+        urlMapping.setExpiryDate(LocalDateTime.now().plusHours(3));
         when(urlRepository.findByShortCode("abc123")).thenReturn(Optional.of(urlMapping));
 
         UrlResponseDto response = urlService.getUrlByShortCode("abc123");
@@ -192,7 +229,7 @@ class UrlServiceTest {
         urlMapping.setExpiryDate(LocalDateTime.now().minusDays(1));
         when(urlRepository.findByShortCode("abc123")).thenReturn(Optional.of(urlMapping));
 
-        assertThrows(UrlNotFoundException.class, () -> urlService.getAnalytics("abc123"));
+        assertThrows(UrlExpiredException.class, () -> urlService.getAnalytics("abc123"));
     }
 
     @Test
@@ -235,7 +272,7 @@ class UrlServiceTest {
         urlMapping.setExpiryDate(LocalDateTime.now().minusDays(1));
         when(urlRepository.findByShortCode("abc123")).thenReturn(Optional.of(urlMapping));
 
-        assertThrows(UrlNotFoundException.class, () -> urlService.getUrlByShortCode("abc123"));
+        assertThrows(UrlExpiredException.class, () -> urlService.getUrlByShortCode("abc123"));
     }
 
     @Test
@@ -259,6 +296,15 @@ class UrlServiceTest {
     }
 
     @Test
+    void testGetOriginalUrl_Expired() {
+        urlMapping.setExpiryDate(LocalDateTime.now().minusMinutes(1));
+        when(urlRepository.findByShortCode("abc123")).thenReturn(Optional.of(urlMapping));
+
+        assertThrows(UrlExpiredException.class, () -> urlService.getOriginalUrl("abc123"));
+        verify(urlRepository, never()).incrementClickCount(anyLong());
+    }
+
+    @Test
     void testUpdateUrl_Success() {
         when(urlRepository.findById(1L)).thenReturn(Optional.of(urlMapping));
         when(urlRepository.save(any(UrlMapping.class))).thenReturn(urlMapping);
@@ -268,6 +314,41 @@ class UrlServiceTest {
         assertNotNull(response);
         assertEquals(urlRequest.getOriginalUrl(), response.getOriginalUrl());
         verify(urlRepository, times(1)).save(any(UrlMapping.class));
+    }
+
+    @Test
+    void testUpdateUrl_WithExpiryDate_Success() {
+        LocalDateTime futureExpiry = LocalDateTime.now().plusDays(5);
+        urlRequest.setExpiryDate(futureExpiry);
+        urlMapping.setExpiryDate(futureExpiry);
+        when(urlRepository.findById(1L)).thenReturn(Optional.of(urlMapping));
+        when(urlRepository.save(any(UrlMapping.class))).thenReturn(urlMapping);
+
+        UrlResponseDto response = urlService.updateUrl(1L, urlRequest);
+
+        assertEquals(futureExpiry, response.getExpiryDate());
+    }
+
+    @Test
+    void testUpdateUrl_WithPastExpiryDate_Fails() {
+        urlRequest.setExpiryDate(LocalDateTime.now().minusSeconds(1));
+        when(urlRepository.findById(1L)).thenReturn(Optional.of(urlMapping));
+
+        InvalidUrlException ex = assertThrows(InvalidUrlException.class, () -> urlService.updateUrl(1L, urlRequest));
+        assertEquals("expiryDate must be a future date-time", ex.getMessage());
+        verify(urlRepository, never()).save(any(UrlMapping.class));
+    }
+
+    @Test
+    void testUpdateUrl_WithNullExpiryDate_Success() {
+        urlRequest.setExpiryDate(null);
+        urlMapping.setExpiryDate(null);
+        when(urlRepository.findById(1L)).thenReturn(Optional.of(urlMapping));
+        when(urlRepository.save(any(UrlMapping.class))).thenReturn(urlMapping);
+
+        UrlResponseDto response = urlService.updateUrl(1L, urlRequest);
+
+        assertNull(response.getExpiryDate());
     }
 
     @Test

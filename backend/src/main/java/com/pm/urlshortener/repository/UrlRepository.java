@@ -7,6 +7,8 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Optional;
 
 @Repository
@@ -17,4 +19,8 @@ public interface UrlRepository extends JpaRepository<UrlMapping, Long> {
     @Modifying
     @Query("UPDATE UrlMapping SET clickCount = clickCount + 1 WHERE id = :id")
     void incrementClickCount(@Param("id") Long id);
+
+    List<UrlMapping> findByExpiryDateBefore(LocalDateTime expiryDate);
+
+    long deleteByExpiryDateBefore(LocalDateTime expiryDate);
 }

@@ -8,11 +8,18 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.core.MethodParameter;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.HttpStatusCode;
+import org.springframework.http.HttpMethod;
+import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.validation.BeanPropertyBindingResult;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.FieldError;
+import org.springframework.web.HttpMediaTypeNotAcceptableException;
+import org.springframework.web.HttpMediaTypeNotSupportedException;
+import org.springframework.web.HttpRequestMethodNotSupportedException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.context.request.WebRequest;
+import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
+import org.springframework.web.servlet.resource.NoResourceFoundException;
 
 import java.lang.reflect.Method;
 
@@ -53,6 +60,19 @@ class GlobalExceptionHandlerTest {
         assertEquals("URL must start with http:// or https://", result.body().getMessage());
         assertEquals("/api/urls/shorten", result.body().getPath());
         assertNotNull(result.body().getTimestamp());
+    }
+
+    @Test
+    void handleUrlExpiredException_shouldReturn410Response() {
+        when(webRequest.getDescription(false)).thenReturn("uri=/api/urls/expired1");
+
+        ResponseEntityAssert<ErrorResponse> result = ResponseEntityAssert.from(
+                handler.handleUrlExpiredException(new UrlExpiredException("Short URL has expired: expired1"), webRequest));
+
+        assertEquals(HttpStatus.GONE, result.status());
+        assertEquals(410, result.body().getStatus());
+        assertEquals("Short URL has expired: expired1", result.body().getMessage());
+        assertEquals("/api/urls/expired1", result.body().getPath());
     }
 
     @Test
@@ -100,6 +120,83 @@ class GlobalExceptionHandlerTest {
         assertEquals(500, result.body().getStatus());
         assertTrue(result.body().getMessage().contains("boom"));
         assertEquals("/api/urls/shorten", result.body().getPath());
+    }
+
+    @Test
+    void handleMessageNotReadable_shouldReturn400Response() {
+        when(webRequest.getDescription(false)).thenReturn("uri=/api/urls/shorten");
+        ResponseEntityAssert<ErrorResponse> result = ResponseEntityAssert.from(
+                handler.handleMessageNotReadableException(new HttpMessageNotReadableException("bad json"), webRequest));
+
+        assertEquals(HttpStatus.BAD_REQUEST, result.status());
+        assertEquals(400, result.body().getStatus());
+        assertEquals("Malformed JSON request", result.body().getMessage());
+    }
+
+    @Test
+    void handleMethodArgumentTypeMismatch_shouldReturn400Response() {
+        when(webRequest.getDescription(false)).thenReturn("uri=/api/urls/notanid");
+        MethodArgumentTypeMismatchException ex = new MethodArgumentTypeMismatchException(
+                "abc", Long.class, "id", null, new IllegalArgumentException("type mismatch"));
+
+        ResponseEntityAssert<ErrorResponse> result = ResponseEntityAssert.from(
+                handler.handleMethodArgumentTypeMismatch(ex, webRequest));
+
+        assertEquals(HttpStatus.BAD_REQUEST, result.status());
+        assertEquals(400, result.body().getStatus());
+        assertEquals("Invalid path parameter type", result.body().getMessage());
+    }
+
+    @Test
+    void handleMethodNotSupported_shouldReturn405Response() {
+        when(webRequest.getDescription(false)).thenReturn("uri=/api/urls/redirect/abc123");
+        HttpRequestMethodNotSupportedException ex = new HttpRequestMethodNotSupportedException("POST");
+
+        ResponseEntityAssert<ErrorResponse> result = ResponseEntityAssert.from(
+                handler.handleMethodNotSupported(ex, webRequest));
+
+        assertEquals(HttpStatus.METHOD_NOT_ALLOWED, result.status());
+        assertEquals(405, result.body().getStatus());
+        assertEquals("Request method 'POST' is not supported", result.body().getMessage());
+    }
+
+    @Test
+    void handleMediaTypeNotSupported_shouldReturn415Response() {
+        when(webRequest.getDescription(false)).thenReturn("uri=/api/urls/shorten");
+        HttpMediaTypeNotSupportedException ex = new HttpMediaTypeNotSupportedException("Content type not supported");
+
+        ResponseEntityAssert<ErrorResponse> result = ResponseEntityAssert.from(
+                handler.handleMediaTypeNotSupported(ex, webRequest));
+
+        assertEquals(HttpStatus.UNSUPPORTED_MEDIA_TYPE, result.status());
+        assertEquals(415, result.body().getStatus());
+        assertTrue(result.body().getMessage().contains("Unsupported Content-Type"));
+    }
+
+    @Test
+    void handleMediaTypeNotAcceptable_shouldReturn406Response() {
+        when(webRequest.getDescription(false)).thenReturn("uri=/api/urls/shorten");
+        HttpMediaTypeNotAcceptableException ex = new HttpMediaTypeNotAcceptableException("No acceptable representation");
+
+        ResponseEntityAssert<ErrorResponse> result = ResponseEntityAssert.from(
+                handler.handleMediaTypeNotAcceptable(ex, webRequest));
+
+        assertEquals(HttpStatus.NOT_ACCEPTABLE, result.status());
+        assertEquals(406, result.body().getStatus());
+        assertEquals("Requested response media type is not acceptable", result.body().getMessage());
+    }
+
+    @Test
+    void handleNoResourceFound_shouldReturn404Response() {
+        when(webRequest.getDescription(false)).thenReturn("uri=/api/unknownpath");
+        NoResourceFoundException ex = new NoResourceFoundException(HttpMethod.GET, "/api/unknownpath");
+
+        ResponseEntityAssert<ErrorResponse> result = ResponseEntityAssert.from(
+                handler.handleNoResourceFound(ex, webRequest));
+
+        assertEquals(HttpStatus.NOT_FOUND, result.status());
+        assertEquals(404, result.body().getStatus());
+        assertEquals("Resource not found", result.body().getMessage());
     }
 
     private static class DummyHandler {

@@ -64,6 +64,43 @@ This test plan defines the QA strategy for the Spring Boot URL Shortener applica
 - Security tests will be executed in a controlled environment only.
 - Performance baselines will be measured for both single-request and concurrent-request scenarios.
 
+## 2.1 Testing Approach
+
+The test execution approach follows a risk-based, layered model to ensure fast feedback and controlled defect detection.
+
+### Phase-wise Approach
+
+1. **Contract-First Validation**
+   - Validate endpoint paths, methods, request schema, and response schema against Swagger/OpenAPI.
+   - Confirm status code behavior for happy-path and core failure-path scenarios.
+
+2. **Functional and Business Rule Verification**
+   - Execute end-to-end API scenarios for create, retrieve, redirect, analytics, update, and delete flows.
+   - Verify URL normalization, uniqueness behavior, click count semantics, and expiry behavior.
+
+3. **Negative, Boundary, and Validation Depth**
+   - Exercise malformed JSON, invalid method usage, unknown resources, payload boundaries, and invalid path variables.
+   - Validate field-level constraints (`@NotBlank`, length limits, protocol rules, expiry future-date rule).
+
+4. **Security and Abuse-Case Coverage**
+   - Execute OWASP-oriented payloads for injection, XSS-like input, and large payload stress.
+   - Verify safe error responses and absence of sensitive implementation details.
+
+5. **Performance and Concurrency Checks**
+   - Measure baseline latency and then execute staged concurrency runs.
+   - Validate stability of short-code uniqueness and click-count updates under concurrent requests.
+
+6. **Regression and Release Gate**
+   - Re-run critical smoke and regression scenarios after each fix.
+   - Use entry/exit criteria as release readiness gates.
+
+### Execution Principles
+
+- **Traceability-first**: Every test case maps back to a requirement and API contract.
+- **Shift-left validation**: Unit and integration checks run before full API execution cycles.
+- **Evidence-based QA**: Results are documented with request/response proof and defect IDs.
+- **Deterministic re-runability**: Test data and scenarios are designed for repeatable execution.
+
 ---
 
 ## 3. Test Environment
