@@ -1,0 +1,198 @@
+================================================================================
+                    JAVA COMPILATION ERROR DIAGNOSIS
+================================================================================
+
+ERROR MESSAGE:
+  java: java.lang.ExceptionInInitializerError
+  com.sun.tools.javac.code.TypeTag :: UNKNOWN
+
+================================================================================
+                          ROOT CAUSE ANALYSIS
+================================================================================
+
+PRIMARY ISSUE: Java Version Mismatch
+───────────────────────────────────────────────────────────────────────────────
+
+Detected Environment:
+  ✅ Project Target:     Java 21    (pom.xml: <java.version>21</java.version>)
+  ❌ System Java:        Java 26.0.1 (MISMATCH - Too new)
+  ❌ Maven using:        Java 26.0.1 (from system PATH)
+  ❌ Compiler (javac):   26.0.11     (MISMATCH - Too new)
+
+The Problem:
+  Java 26 compiler is attempting to compile code configured for Java 21
+  This causes the compiler's internal type system to fail initialization
+
+================================================================================
+                     HOW THE ERROR OCCURS
+================================================================================
+
+Step-by-Step Breakdown:
+
+1. Maven invokes Java 26 javac compiler
+   └─ System has Java 26 as default
+   
+2. Compiler initializes with Java 26 features/capabilities
+   └─ Sets up type system for Java 26 features
+   
+3. Compiler tries to compile Java 21 code
+   └─ Reads project pom.xml: target = Java 21
+   
+4. Type system mismatch detected
+   └─ Java 26 type structures don't align with Java 21 target
+   
+5. TypeTag enum initialization fails
+   └─ TypeTag is a Java internal enum that maps types to categories
+   └─ Encounters a type it cannot map
+   └─ Assigns value: UNKNOWN
+   
+6. Static initialization exception thrown
+   └─ ExceptionInInitializerError is raised
+   └─ Compilation fails immediately
+   └─ No classes are compiled
+
+================================================================================
+                       TECHNICAL EXPLANATION
+================================================================================
+
+What is TypeTag?
+  ├─ Internal class in com.sun.tools.javac.code package
+  ├─ Maps all Java types to enum values (categories)
+  ├─ Examples: INT, LONG, CLASS, ARRAY, PACKAGE, etc.
+  └─ Gets initialized when javac starts up
+
+Why Does It Fail?
+  ├─ Type mapping table expects Java 21 types
+  ├─ Compiler internal state is set for Java 26
+  ├─ Mismatch in type representation
+  ├─ TypeTag initialization reaches unknown state
+  └─ Exception is thrown during static initialization
+
+Why Not a Clear Error Message?
+  ├─ This is a FORWARD COMPATIBILITY issue
+  │  (newer compiler → older target)
+  ├─ Java doesn't explicitly check for this scenario
+  ├─ Error occurs at compiler initialization
+  │  (before compilation even starts)
+  ├─ Not a feature availability check
+  └─ Internal compiler state corruption
+
+================================================================================
+                    COMPARISON TABLE
+================================================================================
+
+Scenario                          Error Type              Root Cause
+──────────────────────────────────────────────────────────────────────────
+Older compiler → Newer target    "source option not      Feature not available
+(e.g., Java 11 → Java 21)        supported"              in compiler version
+                                 CLEAR ERROR
+
+Newer compiler → Older target    ExceptionInInitializer  Type system mismatch
+(e.g., Java 26 → Java 21)        UNKNOWN TypeTag         at initialization
+
+Matched versions                 Normal compilation      Everything works
+(e.g., Java 21 → Java 21)        SUCCESS
+
+================================================================================
+                        SYSTEM DIAGNOSTICS
+================================================================================
+
+Current Configuration:
+
+  System PATH Java:
+    Version: Java 26.0.1
+    Vendor: Homebrew
+    Location: /opt/homebrew/Cellar/openjdk/26.0.1/...
+    Status: ❌ TOO NEW for Java 21 project
+
+  Project Configuration:
+    Maven Version: 3.9.16 ✅
+    Target Java: 21 (in pom.xml) ✅
+    Actual Compiler: 26.0.1 ❌ MISMATCH
+
+  Issue:
+    Maven automatically uses system Java
+    System Java (26) is newer than project target (21)
+    Compiler cannot properly initialize for backwards compatibility
+
+================================================================================
+                      COMPILER FLOW DIAGRAM
+================================================================================
+
+CORRECT FLOW (Java 21 → Java 21):
+  ┌─────────────────────────────────────────┐
+  │ Maven starts                            │
+  ├─────────────────────────────────────────┤
+  │ ↓ Uses Java 21 compiler                 │
+  ├─────────────────────────────────────────┤
+  │ ↓ javac initializes with Java 21 types  │
+  ├─────────────────────────────────────────┤
+  │ ↓ Type system ready for Java 21         │
+  ├─────────────────────────────────────────┤
+  │ ↓ Compiles Java 21 project              │
+  ├─────────────────────────────────────────┤
+  │ ✅ SUCCESS                              │
+  └─────────────────────────────────────────┘
+
+CURRENT BROKEN FLOW (Java 26 → Java 21):
+  ┌─────────────────────────────────────────┐
+  │ Maven starts                            │
+  ├─────────────────────────────────────────┤
+  │ ↓ Uses Java 26 compiler (system default)│
+  ├─────────────────────────────────────────┤
+  │ ↓ javac initializes with Java 26 types  │
+  ├─────────────────────────────────────────┤
+  │ ↓ Reads project target: Java 21         │
+  ├─────────────────────────────────────────┤
+  │ ↓ TYPE SYSTEM MISMATCH DETECTED         │
+  ├─────────────────────────────────────────┤
+  │ ↓ TypeTag enum reaches UNKNOWN          │
+  ├─────────────────────────────────────────┤
+  │ ✅ ExceptionInInitializerError thrown   │
+  ├─────────────────────────────────────────┤
+  │ ❌ COMPILATION FAILS                    │
+  └─────────────────────────────────────────┘
+
+================================================================================
+                    WHY LOMBOK IS NOT THE ISSUE
+================================================================================
+
+Error Location:  Compiler initialization
+                 ↓
+Lombok runs:     During annotation processing
+                 ↓
+Timing:          AFTER compiler initialization
+
+This error occurs BEFORE annotation processing even begins, so Lombok cannot
+be the cause. The compiler fails to initialize, preventing it from reaching
+the annotation processing phase where Lombok operates.
+
+If it were a Lombok issue, you would see:
+  ✗ "symbol not found" errors
+  ✗ "method not generated" errors
+  ✗ "annotation processing failed" messages
+  ✗ Specific Lombok-related error text
+
+Instead, we see:
+  ✓ Compiler initialization failure
+  ✓ TypeTag (compiler internal) exception
+  ✓ No per-file compilation errors
+
+================================================================================
+                         KEY INSIGHT
+================================================================================
+
+This is NOT a code problem.
+This is NOT a Lombok problem.
+This is NOT a dependency problem.
+
+This is a COMPILER VERSION INCOMPATIBILITY problem.
+
+The Java 26 compiler's internal type system cannot properly handle the
+backwards compatibility requirement of compiling for Java 21 target.
+
+The initialization of TypeTag (the type mapping system) fails because it
+encounters a state it was not designed to handle: a version 26 compiler
+trying to map types for version 21 code.
+
+================================================================================

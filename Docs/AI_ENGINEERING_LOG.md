@@ -36,7 +36,7 @@ All generated outputs were reviewed and validated before implementation.
 
 # AI Prompt Log
 
-## Prompt 1
+## Prompt 1 - Generate Requirement Document
 
 Objective
 
@@ -84,7 +84,19 @@ Architecture
 
 Prompt
 
-Design a scalable Spring Boot architecture for URL Shortener.
+Design scalable Spring Boot architecture.
+
+Use
+
+Hexagonal Architecture
+
+SOLID
+
+Layered Design
+
+Repository Pattern
+
+DTO Pattern
 
 Outcome
 
@@ -98,13 +110,26 @@ Accepted with minor simplifications.
 
 ## Prompt 4
 
-Objective
+Intent
 
-REST Controller
+Generate REST Controller.
+
+Constraints
 
 Prompt
+Generate REST Controller.
 
-Generate Spring Boot REST Controller.
+Use
+- REST conventions
+- Proper HTTP Status codes
+- Validation
+- Swagger annotations
+- Exception handling
+
+Acceptance Criteria
+
+- POST /shorten
+- GET /{code}
 
 Outcome
 
@@ -112,11 +137,11 @@ Controller generated.
 
 Decision
 
-Modified exception handling.
+Accepted with minor adjustments.
 
 ---
 
-## Prompt 5
+## Prompt 5 - Generate JPA entity for URL Mapping
 
 Objective
 
@@ -124,7 +149,27 @@ Repository
 
 Prompt
 
-Generate Spring Data JPA Repository.
+Generate JPA entity for URL Mapping.
+
+Requirements
+
+UUID id
+
+originalUrl
+
+shortCode
+
+expiryDate
+
+clickCount
+
+createdAt
+
+Use Lombok
+
+Use Validation
+
+Java 21
 
 Outcome
 
@@ -136,7 +181,49 @@ Accepted.
 
 ---
 
-## Prompt 6
+## Prompt 6 – Generate Domain Model
+
+Intent:
+Generate entities for URL Shortener.
+
+Context:
+Spring Boot 3.5
+Java 21
+JPA
+PostgreSQL
+
+Constraints
+
+- Follow SOLID principles
+- Use Lombok
+- Use UUID as primary key
+- Validate URL format
+
+Acceptance Criteria
+
+- Clean JPA entities
+- Production-ready
+- No business logic
+
+
+## Prompt 7 –Generate Service Layer.
+
+Prompt
+Generate Service Layer.
+
+Requirements
+
+Logging
+
+Validation
+
+Custom Exceptions
+
+Transaction Management
+
+SOLID
+
+## Prompt 8 - Generate Unit Tests
 
 Objective
 
@@ -144,8 +231,21 @@ Unit Tests
 
 Prompt
 
-Generate JUnit tests.
+Generate JUnit5 test cases.
 
+Cover
+
+Success
+
+Failure
+
+Invalid URL
+
+Expired URL
+
+Duplicate URL
+
+Repository Exception
 Outcome
 
 Tests generated.
@@ -155,6 +255,15 @@ Decision
 Added additional edge cases manually.
 
 ---
+
+## Prompt 9 - Generate API documentations
+
+Generate API documentation.
+
+Generate README.
+
+Generate Architecture explanation.
+
 
 # AI Productivity
 
