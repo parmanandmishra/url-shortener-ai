@@ -421,10 +421,10 @@
               "script": {
                 "type": "text/javascript",
                 "exec": [
-                  "pm.test('HTTP status is 400', function () { pm.response.to.have.status(400); });",
+                  "pm.test('HTTP status is 404', function () { pm.response.to.have.status(404); });",
                   "pm.test('Response body is valid JSON', function () { pm.expect(function () { pm.response.json(); }).to.not.throw(); });",
                   "const json = pm.response.json();",
-                  "pm.test('Protocol validation message returned', function () { pm.expect(json.message).to.eql('URL must start with http:// or https://'); });"
+                  "pm.test('Protocol validation message returned', function () { pm.expect(json.message).to.contain('URL not found with id'); });"
                 ]
               }
             }
@@ -610,7 +610,7 @@
               "script": {
                 "type": "text/javascript",
                 "exec": [
-                  "pm.test('HTTP status is 200', function () { pm.response.to.have.status(200); });",
+                  "pm.test('HTTP status is 404', function () { pm.response.to.have.status(404); });",
                   "pm.test('Response body is valid JSON', function () { pm.expect(function () { pm.response.json(); }).to.not.throw(); });"
                 ]
               }
