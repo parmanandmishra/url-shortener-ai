@@ -56,16 +56,20 @@ POST /shorten\
 GET /{shortCode}\
 GET /analytics/{shortCode}
 
-## Phase 4 — Frontend
+<!-- 
+
+ ## Phase 4 — Frontend
 
 Tasks
 
 URL Input Screen\
 Display Short URL\
 Error Handling\
-Copy Button
+Copy Button 
+-->
 
-## Phase 5 — Testing
+
+## Phase 4 — Testing
 
 Tasks
 
@@ -74,7 +78,7 @@ Integration Tests\
 API Testing\
 Coverage Report
 
-## Phase 6 — Documentation
+## Phase 5 — Documentation
 
 Tasks
 

@@ -174,7 +174,7 @@ Start with **contract/error hardening** to stabilize user trust and integration 
 - Documentation reflects implemented behavior only (no contract drift).
 
 ## 9.3 Measurable Criteria
-- `4xx/5xx` classification accuracy improved for malformed and invalid inputs.
+- Classification accuracy improved for malformed and invalid inputs.
 - API test plan scenarios for reliability and validation execute with pass evidence.
 - Zero critical security findings introduced by UX improvements.
 
