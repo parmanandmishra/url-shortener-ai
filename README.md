@@ -51,8 +51,6 @@ While Generative AI was used to accelerate development, every architectural deci
 
 ## Frontend
 
-- React
-- Material UI
 
 ## Testing
 
@@ -71,11 +69,37 @@ While Generative AI was used to accelerate development, every architectural deci
 ```
 url-shortener-ai/
 │
-├── backend/
-├── frontend/
-├── Docs/
-├── screenshots/
-├── tests/
+├── backend/                         # Spring Boot application source code
+│   ├── src/
+│   ├── target/
+│   └── pom.xml
+│
+├── Docs/                            # Assessment documentation
+│   ├── images/
+│   ├── AI_COMPLIANCE_REVIEW.md
+│   ├── AI_ENGINEERING_LOG.md
+│   ├── AMBIGUOUS_SCENARIO.md
+│   ├── API_DOCUMENTATION.md
+│   ├── API_GOVERNANCE.md
+│   ├── API_TEST_PLAN.md
+│   ├── ARCHITECTURE.md
+│   ├── BROWNFIELD_SCENARIO.md
+│   ├── CODE_COVERAGE.md
+│   ├── ENGINEERING_APPROACH.md
+│   ├── GREENFIELD_SCENARIO.md
+│   ├── JAVA_COMPILATION_ERROR_ANALYSIS.md
+│   ├── RELIABILITY_REVIEW.md
+│   ├── REQUIREMENT_ANALYSIS.md
+│   ├── TASK_DECOMPOSITION.md
+│   ├── TEST_COVERAGE_REVIEW.md
+│   └── TEST_RESULTS.md
+│
+├── postman/
+│   └── URLShortener.postman_collection.json
+│
+├── .github/
+├── .gitignore
+├── pom.xml
 └── README.md
 ```
 
@@ -84,17 +108,25 @@ url-shortener-ai/
 # Documentation
 
 Detailed engineering documents are available under the **Docs** folder.
-
-| Document | Description |
-|----------|-------------|
-| Engineering Approach | Overall implementation strategy and AI-assisted development approach |
-| Requirement Analysis | Functional and Non-Functional requirements |
-| Task Decomposition | Breakdown of implementation tasks |
-| Solution Architecture | Architecture, APIs, database design and design decisions |
-| AI Engineering Log | AI prompts, generated outputs, validation and engineering decisions |
-| Greenfield Scenario | AI-assisted development for a new feature |
-| Brownfield Scenario | AI-assisted enhancement to an existing system |
-| Ambiguous Requirements | Requirement clarification and engineering assumptions |
+| Document                               | Description                                                                                                                                             |
+| -------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **REQUIREMENT_ANALYSIS.md**            | Functional and non-functional requirements derived from the assessment along with project scope and deliverables.                                       |
+| **TASK_DECOMPOSITION.md**              | Engineering work breakdown, implementation phases, priorities, and execution sequence.                                                                  |
+| **ENGINEERING_APPROACH.md**            | Overall engineering strategy, SDLC approach, AI-assisted workflow, validation process, and quality gates.                                               |
+| **ARCHITECTURE.md**                    | Solution architecture, component design, API interactions, database model, and key design decisions.                                                    |
+| **GREENFIELD_SCENARIO.md**             | AI-assisted implementation of the Greenfield scenario demonstrating decomposition, implementation, and validation.                                      |
+| **BROWNFIELD_SCENARIO.md**             | Brownfield impact analysis and implementation approach for enhancing the existing application with URL Expiration functionality.                        |
+| **AMBIGUOUS_SCENARIO.md**              | Structured reasoning for ambiguous requirements including assumptions, risks, stakeholder questions, and engineering decisions.                         |
+| **API_DOCUMENTATION.md**               | Complete REST API reference including endpoints, request/response models, validation rules, and error responses.                                        |
+| **API_TEST_PLAN.md**                   | Comprehensive API testing strategy covering positive, negative, boundary, validation, and error scenarios.                                              |
+| **TEST_RESULTS.md**                    | Results of executed API validation scenarios including observed responses, status codes, pass/fail status, and evidence.                                |
+| **CODE_COVERAGE.md**                   | JaCoCo code coverage summary with execution details, metrics, and observations.                                                                         |
+| **TEST_COVERAGE_REVIEW.md**            | Review of unit and API test coverage, identified testing gaps, and recommendations for improvement.                                                     |
+| **RELIABILITY_REVIEW.md**              | Assessment of production readiness including exception handling, validation, logging, transactions, health checks, and reliability features.            |
+| **API_GOVERNANCE.md**                  | API governance guidelines including REST standards, versioning, naming conventions, validation, and consistency checks.                                 |
+| **JAVA_COMPILATION_ERROR_ANALYSIS.md** | Analysis of compilation/runtime issues encountered during development along with root cause and resolution.                                             |
+| **AI_ENGINEERING_LOG.md**              | Complete AI engineering workflow including structured prompts, prompt traceability, AI outputs, validation, human decisions, and engineering ownership. |
+| **AI_COMPLIANCE_REVIEW.md**            | Review of responsible AI usage, AI governance, traceability, validation practices, and compliance with assessment expectations.                         |
 
 ---
 
