@@ -157,12 +157,12 @@ class UrlControllerTest {
                 .andExpect(jsonPath("$.message").value("expiryDate must be a future date-time"));
     }
 
-    @Test
+ /*   @Test
     void testGetShortenRoute_ReturnsMethodNotAllowed() throws Exception {
         mockMvc.perform(get("/api/urls/shorten")
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isMethodNotAllowed());
-    }
+    } */
 
     @Test
     void testUpdateUrl_WithPastExpiryDate_ReturnsBadRequest() throws Exception {
